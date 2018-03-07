@@ -2,6 +2,8 @@
 
 from numpy import random as npr
 
+QUALITY = "G"
+
 def get_basename(file_name):
     if ("/") in file_name:
         basename = file_name.split("/")[-1].split(".")[0]
@@ -80,9 +82,9 @@ def prepare_fastq(fastq_dict, fwd_reads, rev_reads, basename, read_length):
     fastq_dict[basename] = [[] for i in range(2)]
     cnt = 1
     for read1, read2 in zip(fwd_reads, rev_reads):
-        towrite_fwd = "@"+basename+"_"+str(cnt)+"/1"+"\n"+read1+"\n+\n"+"d"*read_length+"\n"
+        towrite_fwd = "@"+basename+"_"+str(cnt)+"/1"+"\n"+read1+"\n+\n"+QUALITY*read_length+"\n"
         fastq_dict[basename][0].append(towrite_fwd)
-        towrite_rev = "@"+basename+"_"+str(cnt)+"/2"+"\n"+read2+"\n+\n"+"d"*read_length+"\n"
+        towrite_rev = "@"+basename+"_"+str(cnt)+"/2"+"\n"+read2+"\n+\n"+QUALITY*read_length+"\n"
         fastq_dict[basename][1].append(towrite_rev)
         cnt += 1
     return(fastq_dict)
@@ -103,14 +105,14 @@ def write_fastq(all_reads, basename, orientation, read_length, outfile):
                 fw.write("@"+basename+"\n")
                 fw.write(read+"\n")
                 fw.write("+\n")
-                fw.write("d"*read_length+"\n")
+                fw.write(QUALITY*read_length+"\n")
     else:
         with open(outfile+"."+str(orientation)+".fastq", "w") as fw:
             for read in all_reads:
                 fw.write("@"+basename+"\n")
                 fw.write(read+"\n")
                 fw.write("+\n")
-                fw.write("d"*read_length+"\n")
+                fw.write(QUALITY*read_length+"\n")
 
 
 
