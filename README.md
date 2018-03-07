@@ -1,3 +1,5 @@
+![Conda (channel only)](https://img.shields.io/conda/vn/conda-forge/python.svg)](https://anaconda.org/maxibor/adrsm)
+
 <img src="./img/logo_adrsm.png" width="300">
 
 # Introduction
@@ -15,8 +17,12 @@ conda install -c maxibor adrsm
 # Usage
 
 ```
-adrsm -d path/to/genome/directory configFile.txt
+adrsm -d ./data/genomes ./data/short_genome_list.csv
 ```
+# Output
+
+- `metagenome.{1,2}.fastq` : Simulated paired end reads
+- `stats.csv` : Statistics of simulated metagenome (organism, percentage of organism's DNA in metagenome)
 
 # Help
 
@@ -47,7 +53,7 @@ optional arguments:
 ```
 
 ## Genome directory
-Each genome `fasta` file must be names after the name of the organism. (ex: `Bacillus_anthracis_genome.fa`)
+Each genome `fasta` file must be names after the name of the organism. (example: [data/genomes](./data/genomes))
 
 ## Configuration file (`confFile`)
 The configuration file is a `.csv` file describing, one line per genome, the mean insert size, and the expected genome coverage.
