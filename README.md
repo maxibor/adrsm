@@ -1,4 +1,4 @@
-[![Conda](https://img.shields.io/conda/vn/conda-forge/python.svg)](https://anaconda.org/maxibor/adrsm) [![Build Status](https://travis-ci.org/maxibor/adrsm.svg?branch=master)](https://travis-ci.org/maxibor/adrsm)
+[![Anaconda-Server Badge](https://anaconda.org/maxibor/adrsm/badges/installer/conda.svg)](https://conda.anaconda.org/maxibor) [![Build Status](https://travis-ci.org/maxibor/adrsm.svg?branch=master)](https://travis-ci.org/maxibor/adrsm)
 
 ---
 
