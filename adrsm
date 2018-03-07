@@ -47,6 +47,11 @@ def _get_args():
     default="metagenome",
     help="Output file basename. Default = ./metagenome.*")
     parser.add_argument(
+    '-q',
+    dest="quality",
+    default="d",
+    help="Base quality encoding. Default = d (PHRED+64)")
+    parser.add_argument(
     '-s',
     dest="stats",
     default="stats.csv",
@@ -62,9 +67,10 @@ def _get_args():
     a2 = args.revAdapt
     err = float(args.error)
     outfile= args.output
+    quality = args.quality
     stats = args.stats
 
-    return(infile, gendir, readlen, lendev, a1, a2, err, outfile, stats)
+    return(infile, gendir, readlen, lendev, a1, a2, err, outfile, quality, stats)
 
 def read_config(infile, gendir):
     """
@@ -83,7 +89,7 @@ def read_config(infile, gendir):
     return(genomes)
 
 if __name__ == "__main__":
-    INFILE, GENDIR, READLEN, LENDEV, A1, A2, ERR, OUTFILE, STATS = _get_args()
+    INFILE, GENDIR, READLEN, LENDEV, A1, A2, ERR, OUTFILE, QUALITY, STATS = _get_args()
     MINLENGTH = 20
 
     genome_dict = {}
@@ -100,7 +106,8 @@ if __name__ == "__main__":
                                   A2 = A2,
                                   MINLENGTH = MINLENGTH,
                                   ERR = ERR,
-                                  fastq_dict = genome_dict)
+                                  fastq_dict = genome_dict,
+                                  QUALITY=QUALITY)
         stat_dict[ad.get_basename(agenome)] = stat_and_run
 
     ad.write_fastq_multi(fastq_dict=genome_dict, outputfile=OUTFILE)

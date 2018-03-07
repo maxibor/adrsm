@@ -31,7 +31,7 @@ adrsm -d ./data/genomes ./data/short_genome_list.csv
 ```
 maxime@gph:~$ adrsm --help
 usage: ADRSM [-h] [-d DIRECTORY] [-r READLENGTH] [-l LENSTDEV] [-fwd FWDADAPT]
-             [-rev REVADAPT] [-e ERROR] [-o OUTPUT] [-s STATS]
+             [-rev REVADAPT] [-e ERROR] [-o OUTPUT] [-q QUALITY] [-s STATS]
              confFile
 
 Ancient DNA Read Simulator for Metagenomics
@@ -50,6 +50,7 @@ optional arguments:
                  AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT
   -e ERROR       Illumina sequecing error. Default = 0.01
   -o OUTPUT      Output file basename. Default = ./metagenome.*
+  -q QUALITY     Base quality encoding. Default = d (PHRED+64)
   -s STATS       Statistic file. Default = stats.csv
 
 ```
