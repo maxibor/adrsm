@@ -9,8 +9,8 @@ import argparse
 def _get_args():
     '''This function parses and return arguments passed in'''
     parser = argparse.ArgumentParser(
-    prog='MetaBenReadSim',
-    description='Metagenomic Benchmarking Read Simulator for ancient DNA')
+    prog='ADRSM',
+    description='Ancient DNA Read Simulator for Metagenomics')
     parser.add_argument('infile', help="path to reference fasta file")
     parser.add_argument(
     '-n',
