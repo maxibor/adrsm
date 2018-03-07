@@ -59,7 +59,7 @@ Each genome `fasta` file must be names after the name of the organism. (example:
 
 ## Configuration file (`confFile`)
 The configuration file is a `.csv` file describing, one line per genome, the mean insert size, and the expected genome coverage.
-Example [short_genome_list.csv](./short_genome_list.csv):
+Example [short_genome_list.csv](./data/short_genome_list.csv):
 
 ```
 genome, insert_size, coverage
