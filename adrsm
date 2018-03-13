@@ -42,6 +42,21 @@ def _get_args():
     default=0.01,
     help="Illumina sequecing error. Default = 0.01")
     parser.add_argument(
+    '-p',
+    dest="geom_p",
+    default=0.5,
+    help="Geometric distribution parameter for deamination")
+    parser.add_argument(
+    '-m',
+    dest="min",
+    default=0.001,
+    help="Deamination substitution base frequency.")
+    parser.add_argument(
+    '-M',
+    dest="max",
+    default=0.3,
+    help="Deamination substitution max frequency.")
+    parser.add_argument(
     '-o',
     dest="output",
     default="metagenome",
@@ -66,11 +81,15 @@ def _get_args():
     a1 = args.fwdAdapt
     a2 = args.revAdapt
     err = float(args.error)
+    geom_p = args.geom_p
+    themin = args.min
+    themax = args.max
     outfile= args.output
     quality = args.quality
     stats = args.stats
 
-    return(infile, gendir, readlen, lendev, a1, a2, err, outfile, quality, stats)
+    return(infile, gendir, readlen, lendev, a1, a2, err, geom_p, themin, themax, outfile, quality, stats)
+
 
 def read_config(infile, gendir):
     """
@@ -85,11 +104,14 @@ def read_config(infile, gendir):
             agenome = splitline[0].replace(" ","")
             ainsert = int(splitline[1].replace(" ",""))
             acov = float(splitline[2].replace(" ",""))
-            genomes[gendir+"/"+agenome] = [ainsert, acov]
+            deambool = str(splitline[3].replace(" ",""))
+            deamination = ad.parse_yes_no(deambool)
+            genomes[gendir+"/"+agenome] = [ainsert, acov, deamination]
     return(genomes)
 
 if __name__ == "__main__":
-    INFILE, GENDIR, READLEN, LENDEV, A1, A2, ERR, OUTFILE, QUALITY, STATS = _get_args()
+    INFILE,GENDIR,READLEN,LENDEV,A1,A2,ERR,GEOM_P,THEMIN,THEMAX,OUTFILE,QUALITY,STATS = _get_args()
+
     MINLENGTH = 20
 
     genome_dict = {}
@@ -106,9 +128,16 @@ if __name__ == "__main__":
                                   A2 = A2,
                                   MINLENGTH = MINLENGTH,
                                   ERR = ERR,
+                                  DAMAGE = all_genomes[agenome][2],
+                                  GEOM_P = GEOM_P,
+                                  THEMIN = THEMIN,
+                                  THEMAX = THEMAX,
                                   fastq_dict = genome_dict,
                                   QUALITY=QUALITY)
         stat_dict[ad.get_basename(agenome)] = stat_and_run
 
     ad.write_fastq_multi(fastq_dict=genome_dict, outputfile=OUTFILE)
     ad.write_stat(stat_dict=stat_dict, stat_out=STATS)
+    print("-- ADRSM Finished --")
+    print("-- FASTQ files written to "+OUTFILE+".1.fastq and "+OUTFILE+".2.fastq --")
+    print("-- Statistic file written to "+STATS+ " --")

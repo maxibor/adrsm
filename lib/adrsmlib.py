@@ -1,8 +1,17 @@
 #!/usr/bin/env python
 
+import sys
+import numpy as np
 from numpy import random as npr
+from scipy.stats import geom
 
-
+def parse_yes_no(astring):
+    if "yes" in astring:
+        return(True)
+    elif "no" in astring:
+        return(False)
+    else :
+        sys.exit("Please specify deamination (yes | no)")
 
 def get_basename(file_name):
     if ("/") in file_name:
@@ -10,6 +19,9 @@ def get_basename(file_name):
     else:
         basename = file_name.split(".")[0]
     return(basename)
+
+def scale(x, themin, themax):
+    return(np.interp(x, (x.min(), x.max()), (themin, themax)))
 
 def reverse_complement(dna) :
     dna = dna.upper()
@@ -75,6 +87,27 @@ def complement_read(all_inserts, adaptor, read_length):
             result.append("".join(read))
     return(result)
 
+def add_damage(all_inserts, geom_p, scale_min, scale_max):
+    for i in range(0, len(all_inserts)):
+        insert = list(all_inserts[i])
+        insertlen = len(insert)
+        x = np.arange(1, insertlen+1)
+        geom_dist=scale(geom.pmf(x, geom_p),scale_min,scale_max)
+
+        for j in range(0, insertlen):
+            pos = j
+            opp_pos = insertlen-1-j
+
+            ## C -> T deamination
+            if insert[pos] == "C" and geom_dist[j] >= npr.rand():
+                insert[pos] = "T"
+
+            ## G -> A deamination
+            if insert[opp_pos] == "G" and geom_dist[j] >= npr.rand():
+                insert[opp_pos] = "A"
+        all_inserts[i] = "".join(insert)
+    return(all_inserts)
+
 def add_error(all_reads, error_rate):
     for i in range(0, len(all_reads)):
         read = list(all_reads[i])
@@ -83,7 +116,7 @@ def add_error(all_reads, error_rate):
                 read[j] = "N"
             if npr.random() < error_rate:
                 read[j] = npr.choice(["A","T","G","C"])
-                all_reads[i] = "".join(read)
+        all_reads[i] = "".join(read)
     return(all_reads)
 
 def prepare_fastq(fastq_dict, fwd_reads, rev_reads, basename, read_length, quality):
@@ -111,18 +144,20 @@ def write_fastq_multi(fastq_dict, outputfile):
                     f2.write(reads2)
 
 
-def run_read_simulation_multi(INFILE, NREAD, COV, READLEN, INSERLEN, LENDEV, A1, A2, MINLENGTH, ERR, fastq_dict, QUALITY):
-    print("INFILE: ", INFILE)
+def run_read_simulation_multi(INFILE, NREAD, COV, READLEN, INSERLEN, LENDEV, A1, A2, MINLENGTH, ERR,  DAMAGE, GEOM_P, THEMIN, THEMAX, fastq_dict, QUALITY):
+    print("===================")
+    print("Genome: ", INFILE)
     if COV:
-        print("COV: ", COV)
+        print("Coverage: ", COV)
     else:
-        print("NREAD: ", NREAD)
-    print("READLEN: ", READLEN)
-    print("INSERLEN: ", INSERLEN)
-    print("LENDEV: ", LENDEV)
-    print("A1: ", A1)
-    print("A2: ", A2)
-    print("QUALITY", QUALITY)
+        print("Number of reads: ", NREAD)
+    print("Read length: ", READLEN)
+    print("Mean Insert length: ", INSERLEN)
+    print("Insert length standard deviation: ", LENDEV)
+    print("Adaptor 1: ", A1)
+    print("Adaptor 2: ", A2)
+    print("Quality :", QUALITY)
+    print("Deamination:", DAMAGE)
     nread = None
 
 
@@ -131,7 +166,8 @@ def run_read_simulation_multi(INFILE, NREAD, COV, READLEN, INSERLEN, LENDEV, A1,
 
     if COV:
         nread = int(fasta[1]/INSERLEN)
-        print("nread: ", nread)
+        print("Number of reads: ", nread)
+        print("===================\n")
 
     insert_lengths = [int(n) for n in npr.normal(INSERLEN, LENDEV, nread)]
 
@@ -139,6 +175,13 @@ def run_read_simulation_multi(INFILE, NREAD, COV, READLEN, INSERLEN, LENDEV, A1,
 
 
     all_inserts = random_insert(fasta, insert_lengths, READLEN, MINLENGTH)
+    if DAMAGE == True:
+        all_inserts = add_damage(
+        all_inserts = all_inserts,
+        geom_p = GEOM_P,
+        scale_min = THEMIN,
+        scale_max = THEMAX)
+
     fwd_inserts = all_inserts
     rev_inserts = [reverse_complement(i) for i in all_inserts]
     fwd_reads = complement_read(fwd_inserts, A1, READLEN)
