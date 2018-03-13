@@ -78,8 +78,8 @@ With the default parameters, the substitution frequency is depicted below:
 
 <img src="./img/geometric_model.png" width="300">
 
-For each nucleotide, a random number (`Pu`) is sampled from an <a href="https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)">uniform distribution</a> and compared to the corresponding value of the rescaled geometric PMF at this nucleotide `Pg`.   
+For each nucleotide, a random number `Pu` is sampled from an <a href="https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)">uniform distribution</a> (of support [0 ,1]) and compared to the corresponding value `Pg` of the rescaled geometric PMF at this nucleotide.   
 If `Pg >= Pu`, the base is subsituted.
-For the default parameters, the substitutions  distribution along the DNA fragment of the is depicted below:  
+For the default parameters, the substitutions distribution along a DNA fragment is depicted below:  
 
 <img src="./img/geometric_distribution.png" width="300">
