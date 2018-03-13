@@ -71,3 +71,14 @@ genome, insert_size, coverage
 Agrobacterium_tumefaciens_genome.fa, 47 , 0.1
 Bacillus_anthracis_genome.fa, 48, 0.2
 ```
+
+## Note on Deamination simulation
+The deamination is modeled using a [Geometric distribution](https://en.wikipedia.org/wiki/Geometric_distribution).   
+With the default parameters, the substitution frequency is depicted below:  
+
+<img src="./img/geometric_model.png" width="300">
+
+For each nucleotide, a random number (`Pu`) is sampled from an [uniform distribution](https://en.wikipedia.org/wiki/Uniform_distribution_(continuous) and compared to the corresponding value of the rescaled geometric PMF at this nucleotide `Pg`. If `Pg >= Pu`, the base is subsituted.
+For the default parameters, the substitutions  distribution along the DNA fragment of the is depicted below:  
+
+<img src="./img/geometric_distribution.png" width="300">
