@@ -45,17 +45,17 @@ def _get_args():
     '-p',
     dest="geom_p",
     default=0.5,
-    help="Geometric distribution parameter for deamination")
+    help="Geometric distribution parameter for deamination. Default = 0.5")
     parser.add_argument(
     '-m',
     dest="min",
     default=0.001,
-    help="Deamination substitution base frequency.")
+    help="Deamination substitution base frequency. Default = 0.001")
     parser.add_argument(
     '-M',
     dest="max",
     default=0.3,
-    help="Deamination substitution max frequency.")
+    help="Deamination substitution max frequency. Default = 0.3")
     parser.add_argument(
     '-o',
     dest="output",
