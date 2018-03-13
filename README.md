@@ -31,7 +31,8 @@ adrsm -d ./data/genomes ./data/short_genome_list.csv
 ```
 maxime@gph:~$ adrsm --help
 usage: ADRSM [-h] [-d DIRECTORY] [-r READLENGTH] [-l LENSTDEV] [-fwd FWDADAPT]
-             [-rev REVADAPT] [-e ERROR] [-o OUTPUT] [-q QUALITY] [-s STATS]
+             [-rev REVADAPT] [-e ERROR] [-p GEOM_P] [-m MIN] [-M MAX]
+             [-o OUTPUT] [-q QUALITY] [-s STATS]
              confFile
 
 Ancient DNA Read Simulator for Metagenomics
@@ -49,10 +50,13 @@ optional arguments:
   -rev REVADAPT  Reverse adaptor. Default =
                  AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT
   -e ERROR       Illumina sequecing error. Default = 0.01
+  -p GEOM_P      Geometric distribution parameter for deamination. Default =
+                 0.5
+  -m MIN         Deamination substitution base frequency. Default = 0.001
+  -M MAX         Deamination substitution max frequency. Default = 0.3
   -o OUTPUT      Output file basename. Default = ./metagenome.*
   -q QUALITY     Base quality encoding. Default = d (PHRED+64)
   -s STATS       Statistic file. Default = stats.csv
-
 ```
 
 ## Genome directory
