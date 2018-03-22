@@ -5,72 +5,78 @@ import lib.adrsmlib as ad
 
 import argparse
 
+
 def _get_args():
     '''This function parses and return arguments passed in'''
     parser = argparse.ArgumentParser(
-    prog='ADRSM',
-    description='Ancient DNA Read Simulator for Metagenomics')
+        prog='ADRSM',
+        description='Ancient DNA Read Simulator for Metagenomics')
     parser.add_argument('confFile', help="path to configuration file")
     parser.add_argument(
-    '-d',
-    dest="directory",
-    default = ".",
-    help="path to genome directory. Default = .")
+        '-d',
+        dest="directory",
+        default=".",
+        help="path to genome directory. Default = .")
     parser.add_argument(
-    '-r',
-    dest='readLength',
-    default=76,
-    help="Average read length. Default = 76")
+        '-r',
+        dest='readLength',
+        default=76,
+        help="Average read length. Default = 76")
     parser.add_argument(
-    '-l',
-    dest="lenStdev",
-    default=10,
-    help="Insert length standard deviation. Default = 10")
+        '-l',
+        dest="lenStdev",
+        default=10,
+        help="Insert length standard deviation. Default = 10")
     parser.add_argument(
-    '-fwd',
-    dest="fwdAdapt",
-    default="AGATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG",
-    help="Forward adaptor. Default = AGATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG")
+        '-fwd',
+        dest="fwdAdapt",
+        default="AGATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG",
+        help="Forward adaptor. Default = AGATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG")
     parser.add_argument(
-    '-rev',
-    dest="revAdapt",
-    default="AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT",
-    help="Reverse adaptor. Default = AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT")
+        '-rev',
+        dest="revAdapt",
+        default="AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT",
+        help="Reverse adaptor. Default = AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT")
     parser.add_argument(
-    '-e',
-    dest="error",
-    default=0.01,
-    help="Illumina sequecing error. Default = 0.01")
+        '-e',
+        dest="error",
+        default=0.01,
+        help="Illumina sequecing error. Default = 0.01")
     parser.add_argument(
-    '-p',
-    dest="geom_p",
-    default=0.5,
-    help="Geometric distribution parameter for deamination. Default = 0.5")
+        '-p',
+        dest="geom_p",
+        default=0.5,
+        help="Geometric distribution parameter for deamination. Default = 0.5")
     parser.add_argument(
-    '-m',
-    dest="min",
-    default=0.001,
-    help="Deamination substitution base frequency. Default = 0.001")
+        '-m',
+        dest="min",
+        default=0.001,
+        help="Deamination substitution base frequency. Default = 0.001")
     parser.add_argument(
-    '-M',
-    dest="max",
-    default=0.3,
-    help="Deamination substitution max frequency. Default = 0.3")
+        '-M',
+        dest="max",
+        default=0.3,
+        help="Deamination substitution max frequency. Default = 0.3")
     parser.add_argument(
-    '-o',
-    dest="output",
-    default="metagenome",
-    help="Output file basename. Default = ./metagenome.*")
+        '-o',
+        dest="output",
+        default="metagenome",
+        help="Output file basename. Default = ./metagenome.*")
     parser.add_argument(
-    '-q',
-    dest="quality",
-    default="d",
-    help="Base quality encoding. Default = d (PHRED+64)")
+        '-q',
+        dest="quality",
+        default="d",
+        help="Base quality encoding. Default = d (PHRED+64)")
     parser.add_argument(
-    '-s',
-    dest="stats",
-    default="stats.csv",
-    help="Statistic file. Default = stats.csv")
+        '-s',
+        dest="stats",
+        default="stats.csv",
+        help="Statistic file. Default = stats.csv")
+    parser.add_argument(
+        '-se',
+        dest="seed",
+        default=7357,
+        help="Seed for random generator. Default = 7357")
 
     args = parser.parse_args()
 
@@ -84,11 +90,12 @@ def _get_args():
     geom_p = args.geom_p
     themin = args.min
     themax = args.max
-    outfile= args.output
+    outfile = args.output
     quality = args.quality
     stats = args.stats
+    seed = int(args.seed)
 
-    return(infile, gendir, readlen, lendev, a1, a2, err, geom_p, themin, themax, outfile, quality, stats)
+    return(infile, gendir, readlen, lendev, a1, a2, err, geom_p, themin, themax, outfile, quality, stats, seed)
 
 
 def read_config(infile, gendir):
@@ -101,43 +108,45 @@ def read_config(infile, gendir):
         for line in f:
             line = line.rstrip()
             splitline = line.split(",")
-            agenome = splitline[0].replace(" ","")
-            ainsert = int(splitline[1].replace(" ",""))
-            acov = float(splitline[2].replace(" ",""))
-            deambool = str(splitline[3].replace(" ",""))
+            agenome = splitline[0].replace(" ", "")
+            ainsert = int(splitline[1].replace(" ", ""))
+            acov = float(splitline[2].replace(" ", ""))
+            deambool = str(splitline[3].replace(" ", ""))
             deamination = ad.parse_yes_no(deambool)
-            genomes[gendir+"/"+agenome] = [ainsert, acov, deamination]
+            genomes[gendir + "/" + agenome] = [ainsert, acov, deamination]
     return(genomes)
 
+
 if __name__ == "__main__":
-    INFILE,GENDIR,READLEN,LENDEV,A1,A2,ERR,GEOM_P,THEMIN,THEMAX,OUTFILE,QUALITY,STATS = _get_args()
+    INFILE, GENDIR, READLEN, LENDEV, A1, A2, ERR, GEOM_P, THEMIN, THEMAX, OUTFILE, QUALITY, STATS, SEED = _get_args()
 
     MINLENGTH = 20
-
+    npr.seed(SEED)
     genome_dict = {}
     stat_dict = {}
     all_genomes = read_config(INFILE, GENDIR)
     for agenome in all_genomes.keys():
-        stat_and_run = ad.run_read_simulation_multi(INFILE = agenome,
-                                  NREAD = None,
-                                  COV = all_genomes[agenome][1],
-                                  READLEN = READLEN,
-                                  INSERLEN = all_genomes[agenome][0] ,
-                                  LENDEV = LENDEV,
-                                  A1 = A1,
-                                  A2 = A2,
-                                  MINLENGTH = MINLENGTH,
-                                  ERR = ERR,
-                                  DAMAGE = all_genomes[agenome][2],
-                                  GEOM_P = GEOM_P,
-                                  THEMIN = THEMIN,
-                                  THEMAX = THEMAX,
-                                  fastq_dict = genome_dict,
-                                  QUALITY=QUALITY)
+        stat_and_run = ad.run_read_simulation_multi(INFILE=agenome,
+                                                    NREAD=None,
+                                                    COV=all_genomes[agenome][1],
+                                                    READLEN=READLEN,
+                                                    INSERLEN=all_genomes[agenome][0],
+                                                    LENDEV=LENDEV,
+                                                    A1=A1,
+                                                    A2=A2,
+                                                    MINLENGTH=MINLENGTH,
+                                                    ERR=ERR,
+                                                    DAMAGE=all_genomes[agenome][2],
+                                                    GEOM_P=GEOM_P,
+                                                    THEMIN=THEMIN,
+                                                    THEMAX=THEMAX,
+                                                    fastq_dict=genome_dict,
+                                                    QUALITY=QUALITY)
         stat_dict[ad.get_basename(agenome)] = stat_and_run
 
     ad.write_fastq_multi(fastq_dict=genome_dict, outputfile=OUTFILE)
     ad.write_stat(stat_dict=stat_dict, stat_out=STATS)
     print("-- ADRSM Finished --")
-    print("-- FASTQ files written to "+OUTFILE+".1.fastq and "+OUTFILE+".2.fastq --")
-    print("-- Statistic file written to "+STATS+ " --")
+    print("-- FASTQ files written to " + OUTFILE +
+          ".1.fastq and " + OUTFILE + ".2.fastq --")
+    print("-- Statistic file written to " + STATS + " --")
