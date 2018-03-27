@@ -9,7 +9,7 @@ import argparse
 def _get_args():
     '''This function parses and return arguments passed in'''
     parser = argparse.ArgumentParser(
-        prog='ADRSM',
+        prog='ADRSM v0.5',
         description='Ancient DNA Read Simulator for Metagenomics')
     parser.add_argument('confFile', help="path to configuration file")
     parser.add_argument(
@@ -127,7 +127,6 @@ if __name__ == "__main__":
     all_genomes = read_config(INFILE, GENDIR)
     for agenome in all_genomes.keys():
         stat_and_run = ad.run_read_simulation_multi(INFILE=agenome,
-                                                    NREAD=None,
                                                     COV=all_genomes[agenome][1],
                                                     READLEN=READLEN,
                                                     INSERLEN=all_genomes[agenome][0],

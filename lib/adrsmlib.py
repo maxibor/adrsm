@@ -30,7 +30,7 @@ def scale(x, themin, themax):
 def reverse_complement(dna):
     dna = dna.upper()
     '''
-    Reverse complement a DNA string 
+    Reverse complement a DNA string
     '''
     dna = dna[::-1]
     revcom = []
@@ -159,13 +159,10 @@ def write_fastq_multi(fastq_dict, outputfile):
                     f2.write(reads2)
 
 
-def run_read_simulation_multi(INFILE, NREAD, COV, READLEN, INSERLEN, LENDEV, A1, A2, MINLENGTH, ERR,  DAMAGE, GEOM_P, THEMIN, THEMAX, fastq_dict, QUALITY):
+def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, LENDEV, A1, A2, MINLENGTH, ERR,  DAMAGE, GEOM_P, THEMIN, THEMAX, fastq_dict, QUALITY):
     print("===================")
     print("Genome: ", INFILE)
-    if COV:
-        print("Coverage: ", COV)
-    else:
-        print("Number of reads: ", NREAD)
+    print("Coverage: ", COV)
     print("Read length: ", READLEN)
     print("Mean Insert length: ", INSERLEN)
     print("Insert length standard deviation: ", LENDEV)
@@ -178,15 +175,14 @@ def run_read_simulation_multi(INFILE, NREAD, COV, READLEN, INSERLEN, LENDEV, A1,
     basename = get_basename(INFILE)
     fasta = read_fasta(INFILE)
 
-    if COV:
-        nread = int(fasta[1] / INSERLEN)
-        print("Number of reads: ", nread)
-        print("===================\n")
+    nread = int((fasta[1] / INSERLEN) * COV)
+    print("Number of reads: ", nread)
+    print("===================\n")
 
     insert_lengths = [int(n) for n in npr.normal(INSERLEN, LENDEV, nread)]
 
     all_inserts = random_insert(fasta, insert_lengths, READLEN, MINLENGTH)
-    if DAMAGE == True:
+    if DAMAGE:
         all_inserts = add_damage(
             all_inserts=all_inserts,
             geom_p=GEOM_P,
