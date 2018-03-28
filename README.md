@@ -72,10 +72,11 @@ Example [short_genome_list.csv](./data/short_genome_list.csv):
 
 ## Note on Coverage
 
-Given the sequencing error, and the random choice of inserts, the target coverage might differ slightly from the real coverage (fig 1)
+Given the sequencing error, and the random choice of inserts, the target coverage might differ slightly from the real coverage (fig 1)  
 
-<img src="./img/coverage_plot.png" width="600">
-**Figure 1:** Coverage plot for simulated sequencing of *Elephas maximus* mitocondria. Aligned with Bowtie2 (default-parameters). Read-length = 76, insert-length = 200.
+<img src="./img/coverage_plot.png" width="600">  
+
+**Figure 1:** Coverage plot for simulated sequencing of _Elephas maximus_ mitocondria. Aligned with Bowtie2 (default-parameters). Read-length = 76, insert-length = 200.
 
 ## Note on Deamination simulation
 
@@ -83,10 +84,12 @@ The deamination is modeled using a [Geometric distribution](https://en.wikipedia
 With the default parameters, the substitution frequency is depicted in fig 2:  
 
 <img src="./img/geometric_model.png" width="300">  
+
 **Figure 2:** Substitution frequency.
 
 For each nucleotide, a random number `Pu` is sampled from an <a href="https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)">uniform distribution</a> (of support [0 ,1]) and compared to the corresponding value `Pg` of the rescaled geometric PMF at this nucleotide.  
 If `Pg >= Pu`, the base is substituted (fig 2).
 
 <img src="./img/geometric_distribution.png" width="300">  
+
 **Figure 3:** Substitutions distribution along a DNA insert, with default parameters.
