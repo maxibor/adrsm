@@ -88,7 +88,7 @@ With the default parameters, the substitution frequency is depicted in fig 2:
 **Figure 2:** Substitution frequency.
 
 For each nucleotide, a random number `Pu` is sampled from an <a href="https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)">uniform distribution</a> (of support [0 ,1]) and compared to the corresponding value `Pg` of the rescaled geometric PMF at this nucleotide.  
-If `Pg >= Pu`, the base is substituted (fig 2).
+If `Pg >= Pu`, the base is substituted (fig 3).
 
 <img src="./img/geometric_distribution.png" width="300">  
 
