@@ -68,10 +68,10 @@ Each genome `fasta` file must be named after the name of the organism. (example:
 The configuration file is a `.csv` file describing, one line per genome, the mean insert size, and the expected genome coverage.
 Example [short_genome_list.csv](./data/short_genome_list.csv):
 
-| genome (mandatory)                  | insert_size (mandatory) | coverage (mandatory) | deamination (mandatory) |
-| ----------------------------------- | ----------------------- | -------------------- | ----------------------- |
-| Agrobacterium_tumefaciens_genome.fa | 47                      | 0.1                  | yes                     |
-| Bacillus_anthracis_genome.fa        | 48                      | 0.2                  | no                      |
+| genome (mandatory)           | insert_size (mandatory) | coverage (mandatory) | deamination (mandatory) |
+| ---------------------------- | ----------------------- | -------------------- | ----------------------- |
+| Agrobacterium_tumefaciens.fa | 47                      | 0.1                  | yes                     |
+| Bacillus_anthracis.fa        | 48                      | 0.2                  | no                      |
 
 ## Note on Coverage
 
