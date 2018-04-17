@@ -9,7 +9,7 @@ import argparse
 def _get_args():
     '''This function parses and return arguments passed in'''
     parser = argparse.ArgumentParser(
-        prog='ADRSM v0.5',
+        prog='ADRSM v0.6',
         description='Ancient DNA Read Simulator for Metagenomics')
     parser.add_argument('confFile', help="path to configuration file")
     parser.add_argument(

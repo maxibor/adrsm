@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import requests
 import numpy as np
 from numpy import random as npr
 from scipy.stats import geom
@@ -204,15 +205,35 @@ def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MI
                   basename=basename,
                   read_length=READLEN,
                   quality=QUALITY)
-    return(nread * INSERLEN)
+    return([nread * INSERLEN, INSERLEN, COV, DAMAGE])
+
+
+def specie_to_taxid(specie):
+    """
+    Takes a specie_name (ex: Mus_musculus), makes a call to JGI
+    taxonomy API, and returns taxonomy id.
+
+    INPUT:
+        specie(string) ex: "Mus musculus"
+    OUPUT:
+        taxid(str) "10090"
+    """
+
+    request = "http://taxonomy.jgi-psf.org/tax/pt_name/" + specie
+    response = requests.get(request)
+    answer = response.text
+    return(answer)
 
 
 def write_stat(stat_dict, stat_out):
     nbases = []
     for akey in stat_dict:
-        nbases.append(stat_dict[akey])
+        nbases.append(stat_dict[akey][0])
     totbases = sum(nbases)
     with open(stat_out, "w") as fs:
-        fs.write("Organism, percentage of metagenome\n")
+        fs.write(
+            "Organism,taxonomy_id,percentage of metagenome,mean_insert_length,target_coverage,deamination\n")
         for akey in stat_dict:
-            fs.write(akey + "," + str(stat_dict[akey] / totbases) + "\n")
+            taxid = specie_to_taxid(akey)
+            fs.write(akey + "," + str(taxid) + "," + str(round(stat_dict[akey][0] / totbases, 2)) + "," + str(
+                stat_dict[akey][1]) + "," + str(stat_dict[akey][2]) + "," + str(stat_dict[akey][3]) + "\n")

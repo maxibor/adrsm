@@ -28,10 +28,11 @@ ADRSM (Ancient DNA Read Simulator for Metagenomics) is a tool designed to simula
 # Help
 
     maxime@gph:~$ adrsm --help
-    usage: ADRSM [-h] [-d DIRECTORY] [-r READLENGTH] [-l LENSTDEV] [-fwd FWDADAPT]
-                 [-rev REVADAPT] [-e ERROR] [-p GEOM_P] [-m MIN] [-M MAX]
-                 [-o OUTPUT] [-q QUALITY] [-s STATS]
-                 confFile
+    usage: ADRSM v0.6 [-h] [-d DIRECTORY] [-r READLENGTH] [-n NBINOM]
+                      [-fwd FWDADAPT] [-rev REVADAPT] [-e ERROR] [-p GEOM_P]
+                      [-m MIN] [-M MAX] [-o OUTPUT] [-q QUALITY] [-s STATS]
+                      [-se SEED]
+                      confFile
 
     Ancient DNA Read Simulator for Metagenomics
 
@@ -42,7 +43,8 @@ ADRSM (Ancient DNA Read Simulator for Metagenomics) is a tool designed to simula
       -h, --help     show this help message and exit
       -d DIRECTORY   path to genome directory. Default = .
       -r READLENGTH  Average read length. Default = 76
-      -l LENSTDEV    Insert length standard deviation. Default = 10
+      -n NBINOM      n parameter for Negative Binomial insert length distribution.
+                     Default = 8
       -fwd FWDADAPT  Forward adaptor. Default = AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC
                      NNNNNNATCTCGTATGCCGTCTTCTGCTTG
       -rev REVADAPT  Reverse adaptor. Default =
@@ -55,6 +57,7 @@ ADRSM (Ancient DNA Read Simulator for Metagenomics) is a tool designed to simula
       -o OUTPUT      Output file basename. Default = ./metagenome.*
       -q QUALITY     Base quality encoding. Default = d (PHRED+64)
       -s STATS       Statistic file. Default = stats.csv
+      -se SEED       Seed for random generator. Default = 7357
 
 ## Genome directory
 
