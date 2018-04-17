@@ -23,10 +23,10 @@ def _get_args():
         default=76,
         help="Average read length. Default = 76")
     parser.add_argument(
-        '-l',
-        dest="lenStdev",
-        default=10,
-        help="Insert length standard deviation. Default = 10")
+        '-n',
+        dest="nbinom",
+        default=8,
+        help="n parameter for Negative Binomial insert length distribution. Default = 8")
     parser.add_argument(
         '-fwd',
         dest="fwdAdapt",
@@ -83,7 +83,7 @@ def _get_args():
     infile = args.confFile
     gendir = args.directory
     readlen = int(args.readLength)
-    lendev = int(args.lenStdev)
+    nbinom = int(args.nbinom)
     a1 = args.fwdAdapt
     a2 = args.revAdapt
     err = float(args.error)
@@ -95,7 +95,7 @@ def _get_args():
     stats = args.stats
     seed = int(args.seed)
 
-    return(infile, gendir, readlen, lendev, a1, a2, err, geom_p, themin, themax, outfile, quality, stats, seed)
+    return(infile, gendir, readlen, nbinom, a1, a2, err, geom_p, themin, themax, outfile, quality, stats, seed)
 
 
 def read_config(infile, gendir):
@@ -118,7 +118,7 @@ def read_config(infile, gendir):
 
 
 if __name__ == "__main__":
-    INFILE, GENDIR, READLEN, LENDEV, A1, A2, ERR, GEOM_P, THEMIN, THEMAX, OUTFILE, QUALITY, STATS, SEED = _get_args()
+    INFILE, GENDIR, READLEN, NBINOM, A1, A2, ERR, GEOM_P, THEMIN, THEMAX, OUTFILE, QUALITY, STATS, SEED = _get_args()
 
     MINLENGTH = 20
     npr.seed(SEED)
@@ -130,7 +130,7 @@ if __name__ == "__main__":
                                                     COV=all_genomes[agenome][1],
                                                     READLEN=READLEN,
                                                     INSERLEN=all_genomes[agenome][0],
-                                                    LENDEV=LENDEV,
+                                                    NBINOM=NBINOM,
                                                     A1=A1,
                                                     A2=A2,
                                                     MINLENGTH=MINLENGTH,

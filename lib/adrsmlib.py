@@ -159,13 +159,13 @@ def write_fastq_multi(fastq_dict, outputfile):
                     f2.write(reads2)
 
 
-def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, LENDEV, A1, A2, MINLENGTH, ERR,  DAMAGE, GEOM_P, THEMIN, THEMAX, fastq_dict, QUALITY):
+def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MINLENGTH, ERR,  DAMAGE, GEOM_P, THEMIN, THEMAX, fastq_dict, QUALITY):
     print("===================")
     print("Genome: ", INFILE)
     print("Coverage: ", COV)
     print("Read length: ", READLEN)
     print("Mean Insert length: ", INSERLEN)
-    print("Insert length standard deviation: ", LENDEV)
+    print("n parameter for Negative Binomial insert length distribution: ", NBINOM)
     print("Adaptor 1: ", A1)
     print("Adaptor 2: ", A2)
     print("Quality :", QUALITY)
@@ -179,7 +179,9 @@ def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, LENDEV, A1, A2, MI
     print("Number of reads: ", nread)
     print("===================\n")
 
-    insert_lengths = [int(n) for n in npr.normal(INSERLEN, LENDEV, nread)]
+    # negative_binomial parameters
+    prob = NBINOM / (NBINOM + INSERLEN)
+    insert_lengths = npr.negative_binomial(NBINOM, prob, nread)
 
     all_inserts = random_insert(fasta, insert_lengths, READLEN, MINLENGTH)
     if DAMAGE:
