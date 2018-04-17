@@ -4,5 +4,6 @@ python:
 # command to install dependencies
 install: "pip install numpy"
 install: "pip install scipy"
+install: "pip install requests"
 # command to run tests
 script: python adrsm -d ./data/genomes ./data/short_genome_list.csv
