@@ -77,6 +77,11 @@ def _get_args():
         dest="seed",
         default=7357,
         help="Seed for random generator. Default = 7357")
+    parser.add_argument(
+        '-t',
+        dest="threads",
+        default=2,
+        help="Number of threads for parallel processing. Default = 2")
 
     args = parser.parse_args()
 
@@ -94,8 +99,9 @@ def _get_args():
     quality = args.quality
     stats = args.stats
     seed = int(args.seed)
+    threads = int(args.threads)
 
-    return(infile, gendir, readlen, nbinom, a1, a2, err, geom_p, themin, themax, outfile, quality, stats, seed)
+    return(infile, gendir, readlen, nbinom, a1, a2, err, geom_p, themin, themax, outfile, quality, stats, seed, threads)
 
 
 def read_config(infile, gendir):
@@ -118,7 +124,7 @@ def read_config(infile, gendir):
 
 
 if __name__ == "__main__":
-    INFILE, GENDIR, READLEN, NBINOM, A1, A2, ERR, GEOM_P, THEMIN, THEMAX, OUTFILE, QUALITY, STATS, SEED = _get_args()
+    INFILE, GENDIR, READLEN, NBINOM, A1, A2, ERR, GEOM_P, THEMIN, THEMAX, OUTFILE, QUALITY, STATS, SEED, PROCESS = _get_args()
 
     MINLENGTH = 20
     npr.seed(SEED)
@@ -140,7 +146,8 @@ if __name__ == "__main__":
                                                     THEMIN=THEMIN,
                                                     THEMAX=THEMAX,
                                                     fastq_dict=genome_dict,
-                                                    QUALITY=QUALITY)
+                                                    QUALITY=QUALITY,
+                                                    PROCESS=PROCESS)
         stat_dict[ad.get_basename(agenome)] = stat_and_run
 
     ad.write_fastq_multi(fastq_dict=genome_dict, outputfile=OUTFILE)
