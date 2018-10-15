@@ -1,4 +1,5 @@
 [![Anaconda-Server Badge](https://anaconda.org/maxibor/adrsm/badges/installer/conda.svg)](https://anaconda.org/maxibor/adrsm) [![Build Status](https://travis-ci.org/maxibor/adrsm.svg?branch=master)](https://travis-ci.org/maxibor/adrsm)
+[![DOI](https://zenodo.org/badge/124075095.svg)](https://zenodo.org/badge/latestdoi/124075095)
 
 * * *
 
@@ -24,6 +25,12 @@ ADRSM (Ancient DNA Read Simulator for Metagenomics) is a tool designed to simula
 
 -   `metagenome.{1,2}.fastq` : Simulated paired end reads
 -   `stats.csv` : Statistics of simulated metagenome (organism, percentage of organism's DNA in metagenome)
+
+# Cite
+
+You can cite ADRSM like this:
+
+    Maxime Borry (2018). ADRSM: Ancient DNA Read Simulator for Metagenomics. DOI: 10.5281/zenodo.1462744
 
 # Help
 
