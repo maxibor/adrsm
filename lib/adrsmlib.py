@@ -280,7 +280,8 @@ def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MI
 
     fwd_inserts = all_inserts
     # rev_inserts = [reverse_complement(i) for i in all_inserts]
-    rev_inserts = reverse_complement_multi(all_inserts=all_inserts)
+    rev_inserts = reverse_complement_multi(
+        all_inserts=all_inserts, process=PROCESS)
     # fwd_reads = complement_read(fwd_inserts, A1, READLEN)
     fwd_reads = complement_read_multi(fwd_inserts, A1, READLEN, PROCESS)
     # fwd_reads = add_error(fwd_reads, ERR)
