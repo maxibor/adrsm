@@ -27,11 +27,11 @@ ADRSM (Ancient DNA Read Simulator for Metagenomics) is a tool designed to simula
 
 # Help
 
-    maxime@gph:~$ adrsm --help
+    $ adrsm --help
     usage: ADRSM v0.6 [-h] [-d DIRECTORY] [-r READLENGTH] [-n NBINOM]
                       [-fwd FWDADAPT] [-rev REVADAPT] [-e ERROR] [-p GEOM_P]
                       [-m MIN] [-M MAX] [-o OUTPUT] [-q QUALITY] [-s STATS]
-                      [-se SEED]
+                      [-se SEED] [-t THREADS]
                       confFile
 
     Ancient DNA Read Simulator for Metagenomics
@@ -58,6 +58,7 @@ ADRSM (Ancient DNA Read Simulator for Metagenomics) is a tool designed to simula
       -q QUALITY     Base quality encoding. Default = d (PHRED+64)
       -s STATS       Statistic file. Default = stats.csv
       -se SEED       Seed for random generator. Default = 7357
+      -t THREADS     Number of threads for parallel processing. Default = 2
 
 ## Genome directory
 
