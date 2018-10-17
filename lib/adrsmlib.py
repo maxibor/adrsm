@@ -2,11 +2,10 @@
 
 import sys
 import requests
-import numpy as np
 from numpy import random as npr
 import multiprocessing
 from functools import partial
-from scipy.stats import geom
+from . import sequencefunctions as sf
 
 
 def parse_yes_no(astring):
@@ -26,29 +25,16 @@ def get_basename(file_name):
     return(basename)
 
 
-def scale(x, themin, themax):
-    return(np.interp(x, (x.min(), x.max()), (themin, themax)))
-
-
-def reverse_complement(dna):
-    dna = dna.upper()
-    '''
-    Reverse complement a DNA string
-    '''
-    dna = dna[::-1]
-    revcom = []
-    complement = {"A": "T", "T": "A", "G": "C", "C": "G", "N": "N"}
-    for letter in dna:
-        for key in complement.keys():
-            if letter == key:
-                revcom.append(complement[key])
-
-    return "".join(revcom)
+def add_mutation(sequence, mutrate, process):
+    mutate_partial = partial(sf.mutate, mutrate=mutrate)
+    with multiprocessing.Pool(process) as p:
+        mutseq = p.map(mutate_partial, list(sequence))
+    return("".join(mutseq))
 
 
 def reverse_complement_multi(all_inserts, process):
     with multiprocessing.Pool(process) as p:
-        r = list(p.map(reverse_complement, all_inserts))
+        r = list(p.map(sf.reverse_complement, all_inserts))
     return(r)
 
 
@@ -69,145 +55,48 @@ def read_fasta(file_name):
     return([result, len(result)])
 
 
-def random_insert(read_fasta_out, insert_lengths, read_length, minlen):
-    genome = read_fasta_out[0]
-    genome_length = read_fasta_out[1]
+def complement_read_single(all_inserts, adaptor, read_length):
     result = []
-    for i in insert_lengths:
-        if i >= minlen:
-            insert_start = npr.randint(0, genome_length - read_length)
-            insert_end = insert_start + i + 1
-            insert = genome[insert_start:insert_end]
-            result.append(insert)
+    for insert in all_inserts:
+        result.append(sf.complement_read(
+            insert, adaptor=adaptor, read_length=read_length))
     return(result)
-
-
-def _complement_read(insert, adaptor, read_length):
-    inlen = len(insert)
-    if inlen < read_length:
-        diff = read_length - inlen
-        to_add = adaptor[0:diff]
-        read = insert + to_add
-    elif inlen == read_length:
-        read = insert
-    elif inlen > read_length:
-        read = insert[0:read_length]
-    if len(read) == read_length:
-        read = read.upper()
-        read = list(read)
-        for j in range(0, len(read)):
-            if read[j] not in ["A", "T", "G", "C", "N"]:
-                read[j] = "N"
-        return("".join(read))
 
 
 def complement_read_multi(all_inserts, adaptor, read_length, process):
     complement_read_partial = partial(
-        _complement_read, adaptor=adaptor, read_length=read_length)
+        sf.complement_read, adaptor=adaptor, read_length=read_length)
     with multiprocessing.Pool(process) as p:
         r = list(p.map(complement_read_partial, all_inserts))
     return(r)
 
 
-def complement_read(all_inserts, adaptor, read_length):
-    result = []
-    for insert in all_inserts:
-        inlen = len(insert)
-        if inlen < read_length:
-            diff = read_length - inlen
-            to_add = adaptor[0:diff]
-            read = insert + to_add
-        elif inlen == read_length:
-            read = insert
-        elif inlen > read_length:
-            read = insert[0:read_length]
-        if len(read) == read_length:
-            read = read.upper()
-            read = list(read)
-            for j in range(0, len(read)):
-                if read[j] not in ["A", "T", "G", "C", "N"]:
-                    read[j] = "N"
-            result.append("".join(read))
-    return(result)
-
-
-def _add_damage(insert, geom_p, scale_min, scale_max):
-    insert = list(insert)
-    insertlen = len(insert)
-    x = np.arange(1, insertlen + 1)
-    geom_dist = scale(geom.pmf(x, geom_p), scale_min, scale_max)
-
-    for j in range(0, insertlen):
-        pos = j
-        opp_pos = insertlen - 1 - j
-
-        # C -> T deamination
-        if insert[pos] == "C" and geom_dist[j] >= npr.rand():
-            insert[pos] = "T"
-
-        # G -> A deamination
-        if insert[opp_pos] == "G" and geom_dist[j] >= npr.rand():
-            insert[opp_pos] = "A"
-    return("".join(insert))
+def add_damage_single(all_inserts, geom_p, scale_min, scale_max):
+    for i in range(0, len(all_inserts)):
+        all_inserts[i] = sf.add_damage(
+            insert=geom_p, scale_min=scale_min, scale_max=scale_max)
+    return(all_inserts)
 
 
 def add_damage_multi(all_inserts, geom_p, scale_min, scale_max, process):
     add_damage_partial = partial(
-        _add_damage, geom_p=geom_p, scale_min=scale_min, scale_max=scale_max)
+        sf.add_damage, geom_p=geom_p, scale_min=scale_min, scale_max=scale_max)
     with multiprocessing.Pool(process) as p:
         r = list(p.map(add_damage_partial, all_inserts))
     return(r)
 
 
-def add_damage(all_inserts, geom_p, scale_min, scale_max):
-    for i in range(0, len(all_inserts)):
-        insert = list(all_inserts[i])
-        insertlen = len(insert)
-        x = np.arange(1, insertlen + 1)
-        geom_dist = scale(geom.pmf(x, geom_p), scale_min, scale_max)
-
-        for j in range(0, insertlen):
-            pos = j
-            opp_pos = insertlen - 1 - j
-
-            # C -> T deamination
-            if insert[pos] == "C" and geom_dist[j] >= npr.rand():
-                insert[pos] = "T"
-
-            # G -> A deamination
-            if insert[opp_pos] == "G" and geom_dist[j] >= npr.rand():
-                insert[opp_pos] = "A"
-        all_inserts[i] = "".join(insert)
-    return(all_inserts)
-
-
-def _add_error(read, error_rate):
-    read = list(read)
-    for j in range(0, len(read)):
-        if read[j].upper() not in ["A", "T", "G", "C", "N"]:
-            read[j] = "N"
-        if npr.random() < error_rate:
-            read[j] = npr.choice(["A", "T", "G", "C"])
-    return("".join(read))
+def add_error_single(all_reads, error_rate):
+    for i in range(0, len(all_reads)):
+        all_reads[i] = sf.add_error(read=i, error_rate=error_rate)
+    return(all_reads)
 
 
 def add_error_multi(all_reads, error_rate, process):
-    add_error_partial = partial(_add_error, error_rate=error_rate)
+    add_error_partial = partial(sf.add_error, error_rate=error_rate)
     with multiprocessing.Pool(process) as p:
         r = list(p.map(add_error_partial, all_reads))
     return(r)
-
-
-def add_error(all_reads, error_rate):
-    for i in range(0, len(all_reads)):
-        read = list(all_reads[i])
-        for j in range(0, len(read)):
-            if read[j].upper() not in ["A", "T", "G", "C", "N"]:
-                read[j] = "N"
-            if npr.random() < error_rate:
-                read[j] = npr.choice(["A", "T", "G", "C"])
-        all_reads[i] = "".join(read)
-    return(all_reads)
 
 
 def prepare_fastq(fastq_dict, fwd_reads, rev_reads, basename, read_length, quality):
@@ -264,7 +153,7 @@ def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MI
     prob = NBINOM / (NBINOM + INSERLEN)
     insert_lengths = npr.negative_binomial(NBINOM, prob, nread)
 
-    all_inserts = random_insert(fasta, insert_lengths, READLEN, MINLENGTH)
+    all_inserts = sf.random_insert(fasta, insert_lengths, READLEN, MINLENGTH)
     if DAMAGE:
         # all_inserts = add_damage(
         #     all_inserts=all_inserts,
@@ -279,16 +168,16 @@ def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MI
             process=PROCESS)
 
     fwd_inserts = all_inserts
-    # rev_inserts = [reverse_complement(i) for i in all_inserts]
+    # rev_inserts = [sf.reverse_complement(i) for i in all_inserts]
     rev_inserts = reverse_complement_multi(
         all_inserts=all_inserts, process=PROCESS)
-    # fwd_reads = complement_read(fwd_inserts, A1, READLEN)
+    # fwd_reads = complement_read_single(fwd_inserts, A1, READLEN)
     fwd_reads = complement_read_multi(fwd_inserts, A1, READLEN, PROCESS)
-    # fwd_reads = add_error(fwd_reads, ERR)
+    # fwd_reads = add_error_single(fwd_reads, ERR)
     fwd_reads = add_error_multi(fwd_reads, ERR, PROCESS)
-    # rev_reads = complement_read(rev_inserts, A2, READLEN)
+    # rev_reads = complement_read_single(rev_inserts, A2, READLEN)
     rev_reads = complement_read_multi(rev_inserts, A2, READLEN, PROCESS)
-    # rev_reads = add_error(rev_reads, ERR)
+    # rev_reads = add_error_single(rev_reads, ERR)
     rev_reads = add_error_multi(rev_reads, ERR, PROCESS)
 
     prepare_fastq(fastq_dict=fastq_dict,
