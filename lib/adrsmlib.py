@@ -6,7 +6,6 @@ from numpy import random as npr
 import multiprocessing
 from functools import partial
 from . import sequencefunctions as sf
-from tqdm import tqdm
 
 
 def parse_yes_no(astring):
