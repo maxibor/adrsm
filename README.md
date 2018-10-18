@@ -7,7 +7,7 @@
 
 # Introduction
 
-ADRSM (Ancient DNA Read Simulator for Metagenomics) is a tool designed to simulate the paired-end sequencing of a metagenomic community. ADRSM allows you to control precisely the amount of DNA from each organism in the community, which can be used to benchmark different metagenomics methods.
+ADRSM (Ancient DNA Read Simulator for Metagenomics) is a tool designed to simulate the paired-end sequencing of a metagenomic community. ADRSM allows you to control precisely the amount of DNA from each organism in the community, which can be used, for example, to benchmark different metagenomics methods.
 
 # Dependencies
 
