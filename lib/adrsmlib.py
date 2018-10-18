@@ -6,6 +6,7 @@ from numpy import random as npr
 import multiprocessing
 from functools import partial
 from . import sequencefunctions as sf
+from tqdm import tqdm
 
 
 def parse_yes_no(astring):
@@ -25,16 +26,18 @@ def get_basename(file_name):
     return(basename)
 
 
-def add_mutation(sequence, mutrate, process):
+def add_mutation_multi(sequence, mutrate, process):
     mutate_partial = partial(sf.mutate, mutrate=mutrate)
+    print("Mutating...")
     with multiprocessing.Pool(process) as p:
         mutseq = p.map(mutate_partial, list(sequence))
     return("".join(mutseq))
 
 
 def reverse_complement_multi(all_inserts, process):
+    print("Reverse Complemeting...")
     with multiprocessing.Pool(process) as p:
-        r = list(p.map(sf.reverse_complement, all_inserts))
+        r = p.map(sf.reverse_complement, all_inserts)
     return(r)
 
 
@@ -67,7 +70,7 @@ def complement_read_multi(all_inserts, adaptor, read_length, process):
     complement_read_partial = partial(
         sf.complement_read, adaptor=adaptor, read_length=read_length)
     with multiprocessing.Pool(process) as p:
-        r = list(p.map(complement_read_partial, all_inserts))
+        r = p.map(complement_read_partial, all_inserts)
     return(r)
 
 
@@ -81,8 +84,9 @@ def add_damage_single(all_inserts, geom_p, scale_min, scale_max):
 def add_damage_multi(all_inserts, geom_p, scale_min, scale_max, process):
     add_damage_partial = partial(
         sf.add_damage, geom_p=geom_p, scale_min=scale_min, scale_max=scale_max)
+    print("Adding damage...")
     with multiprocessing.Pool(process) as p:
-        r = list(p.map(add_damage_partial, all_inserts))
+        r = p.map(add_damage_partial, all_inserts)
     return(r)
 
 
@@ -95,7 +99,7 @@ def add_error_single(all_reads, error_rate):
 def add_error_multi(all_reads, error_rate, process):
     add_error_partial = partial(sf.add_error, error_rate=error_rate)
     with multiprocessing.Pool(process) as p:
-        r = list(p.map(add_error_partial, all_reads))
+        r = p.map(add_error_partial, all_reads)
     return(r)
 
 
@@ -129,8 +133,8 @@ def write_fastq_multi(fastq_dict, outputfile):
                     f2.write(reads2)
 
 
-def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MINLENGTH, ERR,  DAMAGE, GEOM_P, THEMIN, THEMAX, fastq_dict, QUALITY, PROCESS):
-    print("===================")
+def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MINLENGTH, MUTATE, MUTRATE, AGE, ERR,  DAMAGE, GEOM_P, THEMIN, THEMAX, fastq_dict, QUALITY, PROCESS):
+    print("===================\n===================")
     print("Genome: ", INFILE)
     print("Coverage: ", COV)
     print("Read length: ", READLEN)
@@ -139,6 +143,9 @@ def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MI
     print("Adaptor 1: ", A1)
     print("Adaptor 2: ", A2)
     print("Quality :", QUALITY)
+    print("Mutation rate (bp/year):", MUTRATE)
+    print("Age (years):", AGE)
+    print("Sequencing Error rate", ERR)
     print("Deamination:", DAMAGE)
     nread = None
 
@@ -147,19 +154,20 @@ def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MI
 
     nread = int((fasta[1] / INSERLEN) * COV)
     print("Number of reads: ", nread)
-    print("===================\n")
+    print("-------------------")
 
     # negative_binomial parameters
     prob = NBINOM / (NBINOM + INSERLEN)
     insert_lengths = npr.negative_binomial(NBINOM, prob, nread)
 
+    if MUTATE:
+        correct_mutrate = (MUTRATE * AGE) / fasta[1]
+        fasta[0] = add_mutation_multi(
+            sequence=fasta[0], mutrate=correct_mutrate, process=PROCESS)
+
     all_inserts = sf.random_insert(fasta, insert_lengths, READLEN, MINLENGTH)
+
     if DAMAGE:
-        # all_inserts = add_damage(
-        #     all_inserts=all_inserts,
-        #     geom_p=GEOM_P,
-        #     scale_min=THEMIN,
-        #     scale_max=THEMAX)
         all_inserts = add_damage_multi(
             all_inserts=all_inserts,
             geom_p=GEOM_P,
@@ -171,12 +179,16 @@ def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MI
     # rev_inserts = [sf.reverse_complement(i) for i in all_inserts]
     rev_inserts = reverse_complement_multi(
         all_inserts=all_inserts, process=PROCESS)
+    print("Adding adaptors to forward read...")
     # fwd_reads = complement_read_single(fwd_inserts, A1, READLEN)
     fwd_reads = complement_read_multi(fwd_inserts, A1, READLEN, PROCESS)
+    print("Adding sequencing error to forward read...")
     # fwd_reads = add_error_single(fwd_reads, ERR)
     fwd_reads = add_error_multi(fwd_reads, ERR, PROCESS)
+    print("Adding adaptors to reverse read...")
     # rev_reads = complement_read_single(rev_inserts, A2, READLEN)
     rev_reads = complement_read_multi(rev_inserts, A2, READLEN, PROCESS)
+    print("Adding sequencing error to reverse read...")
     # rev_reads = add_error_single(rev_reads, ERR)
     rev_reads = add_error_multi(rev_reads, ERR, PROCESS)
 

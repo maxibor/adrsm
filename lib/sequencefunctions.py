@@ -86,14 +86,12 @@ def add_error(read, error_rate):
     return("".join(read))
 
 
-def mutate(nucleotide, mutrate):
+def mutate(nucleotide, mutrate, alpha=0.4, beta=0.2):
     """
     alpha: Transitions
     beta: Transversions
     https://en.wikipedia.org/wiki/Mutation_rate
     """
-    alpha = 0.2
-    beta = 0.4
     a = int(10 * alpha)
     b = int(10 * beta)
     dmut = {'A': b * ['C'] + b * ['T'] + a * ['G'], 'C': b * ['A'] + b * ['G'] + a * [

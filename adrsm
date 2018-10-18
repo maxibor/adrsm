@@ -9,7 +9,7 @@ import argparse
 def _get_args():
     '''This function parses and return arguments passed in'''
     parser = argparse.ArgumentParser(
-        prog='ADRSM v0.6',
+        prog='ADRSM v' + str(version),
         description='Ancient DNA Read Simulator for Metagenomics')
     parser.add_argument('confFile', help="path to configuration file")
     parser.add_argument(
@@ -119,11 +119,22 @@ def read_config(infile, gendir):
             acov = float(splitline[2].replace(" ", ""))
             deambool = str(splitline[3].replace(" ", ""))
             deamination = ad.parse_yes_no(deambool)
-            genomes[gendir + "/" + agenome] = [ainsert, acov, deamination]
+            if len(splitline) > 4:
+                mutate = True
+                mutrate = float(splitline[4].replace(" ", ""))
+                age = float(splitline[5].replace(" ", ""))
+            else:
+                mutate = False
+                mutrate = 0
+                age = 0
+
+            genomes[gendir + "/" + agenome] = {'size': ainsert,
+                                               'cov': acov, 'deam': deamination, 'mutate': mutate, 'mutrate': mutrate, 'age': age}
     return(genomes)
 
 
 if __name__ == "__main__":
+    version = 0.7
     INFILE, GENDIR, READLEN, NBINOM, A1, A2, ERR, GEOM_P, THEMIN, THEMAX, OUTFILE, QUALITY, STATS, SEED, PROCESS = _get_args()
 
     MINLENGTH = 20
@@ -133,15 +144,18 @@ if __name__ == "__main__":
     all_genomes = read_config(INFILE, GENDIR)
     for agenome in all_genomes.keys():
         stat_and_run = ad.run_read_simulation_multi(INFILE=agenome,
-                                                    COV=all_genomes[agenome][1],
+                                                    COV=all_genomes[agenome]['cov'],
                                                     READLEN=READLEN,
-                                                    INSERLEN=all_genomes[agenome][0],
+                                                    INSERLEN=all_genomes[agenome]['size'],
                                                     NBINOM=NBINOM,
                                                     A1=A1,
                                                     A2=A2,
                                                     MINLENGTH=MINLENGTH,
+                                                    MUTATE=all_genomes[agenome]['mutate'],
+                                                    MUTRATE=all_genomes[agenome]['mutrate'],
+                                                    AGE=all_genomes[agenome]['age'],
                                                     ERR=ERR,
-                                                    DAMAGE=all_genomes[agenome][2],
+                                                    DAMAGE=all_genomes[agenome]['deam'],
                                                     GEOM_P=GEOM_P,
                                                     THEMIN=THEMIN,
                                                     THEMAX=THEMAX,
@@ -152,7 +166,8 @@ if __name__ == "__main__":
 
     ad.write_fastq_multi(fastq_dict=genome_dict, outputfile=OUTFILE)
     ad.write_stat(stat_dict=stat_dict, stat_out=STATS)
-    print("-- ADRSM Finished --")
+    print("\n-- ADRSM v" + str(version) +
+          " finished generating this mock metagenome --")
     print("-- FASTQ files written to " + OUTFILE +
           ".1.fastq and " + OUTFILE + ".2.fastq --")
     print("-- Statistic file written to " + STATS + " --")

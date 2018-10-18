@@ -35,7 +35,7 @@ You can cite ADRSM like this:
 # Help
 
     $ adrsm --help
-    usage: ADRSM v0.6 [-h] [-d DIRECTORY] [-r READLENGTH] [-n NBINOM]
+    usage: ADRSM v0.7 [-h] [-d DIRECTORY] [-r READLENGTH] [-n NBINOM]
                       [-fwd FWDADAPT] [-rev REVADAPT] [-e ERROR] [-p GEOM_P]
                       [-m MIN] [-M MAX] [-o OUTPUT] [-q QUALITY] [-s STATS]
                       [-se SEED] [-t THREADS]
@@ -76,10 +76,10 @@ Each genome `fasta` file must be named after the name of the organism. (example:
 The configuration file is a `.csv` file describing, one line per genome, the mean insert size, and the expected genome coverage.
 Example [short_genome_list.csv](./data/short_genome_list.csv):
 
-| genome (mandatory)           | insert_size (mandatory) | coverage (mandatory) | deamination (mandatory) |
-| ---------------------------- | ----------------------- | -------------------- | ----------------------- |
-| Agrobacterium_tumefaciens.fa | 47                      | 0.1                  | yes                     |
-| Bacillus_anthracis.fa        | 48                      | 0.2                  | no                      |
+| genome(mandatory)            | insert_size(mandatory) | coverage(mandatory) | deamination(mandatory) | mutation_rate(optional) | age(optional) |
+| ---------------------------- | ---------------------- | ------------------- | ---------------------- | ----------------------- | ------------- |
+| Agrobacterium_tumefaciens.fa | 47                     | 0.1                 | yes                    | 10e-8                   | 10000         |
+| Bacillus_anthracis.fa        | 48                     | 0.2                 | no                     |                         |               |
 
 ## Note on Coverage
 
@@ -104,3 +104,18 @@ If `Pg >= Pu`, the base is substituted (fig 3).
 <img src="./img/geometric_distribution.png" width="300">  
 
 **Figure 3:** Substitutions distribution along a DNA insert, with default parameters.
+
+## Note on sequencing error
+
+ADRSM can simulate Illumina sequencing error with a uniform based model.
+
+## Note on mutation
+
+ADRSM offers you to add [mutation](https://en.wikipedia.org/wiki/Mutation_rate) to your sequences. This allows to account for the evolutionary differences between ancient organisms and their reference genome counterparts present in today's databases.
+
+ADRSM assumes two times more transitions than transversions.
+
+**There are two parameters for mutation simulation:**
+
+-   **The mutation rate** (in bp/year): a good starting point is [10e-7 for bacteria](http://mgen.microbiologyresearch.org/content/journal/mgen/10.1099/mgen.0.000094)
+-   **The age** (in years) of the organism
