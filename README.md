@@ -96,6 +96,8 @@ With the default parameters, the substitution frequency is depicted in fig 2:
 
 <img src="./img/geometric_model.png" width="300">  
 
+One can try different parameters for deamination using this interactive plot: [maxibor.github.io/adrsm](https://maxibor.github.io/adrsm)
+
 **Figure 2:** Substitution frequency.
 
 For each nucleotide, a random number `Pu` is sampled from an <a href="https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)">uniform distribution</a> (of support [0 ,1]) and compared to the corresponding value `Pg` of the rescaled geometric PMF at this nucleotide.  
