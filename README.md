@@ -20,7 +20,7 @@ ADRSM (Ancient DNA Read Simulator for Metagenomics) is a tool designed to simula
 
 # Usage
 
-    adrsm -d ./data/genomes ./data/short_genome_list.csv
+    adrsm ./data/short_genome_list.csv
 
 # Output
 
@@ -75,10 +75,6 @@ You can cite ADRSM like this:
     -s STATS       Statistic file. Default = stats.csv
     -se SEED       Seed for random generator. Default = 7357
     -t THREADS     Number of threads for parallel processing. Default = 2
-
-## Genome directory
-
-Each genome `fasta` file must be named after the name of the organism. (example: [data/genomes](./data/genomes))
 
 ## Configuration file (`confFile`)
 
