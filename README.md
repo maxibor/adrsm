@@ -40,7 +40,17 @@ You can cite ADRSM like this:
                   [-o OUTPUT] [-q QUALITY] [-s STATS] [-se SEED] [-t THREADS]
                   confFile
 
-    Ancient DNA Read Simulator for Metagenomics
+    ==================================================
+
+    ADRSM: Ancient DNA Read Simulator for Metagenomics
+
+    Author: Maxime Borry
+
+    Contact: <borry[at]shh.mpg.de>
+
+    Homepage & Documentation: github.com/maxibor/adrsm
+    ==================================================
+
 
     positional arguments:
     confFile       path to configuration file
