@@ -35,37 +35,35 @@ You can cite ADRSM like this:
 # Help
 
     $ adrsm --help
-    usage: ADRSM v0.7 [-h] [-d DIRECTORY] [-r READLENGTH] [-n NBINOM]
-                      [-fwd FWDADAPT] [-rev REVADAPT] [-e ERROR] [-p GEOM_P]
-                      [-m MIN] [-M MAX] [-o OUTPUT] [-q QUALITY] [-s STATS]
-                      [-se SEED] [-t THREADS]
-                      confFile
+    usage: ADRSM v0.8 [-h] [-r READLENGTH] [-n NBINOM] [-fwd FWDADAPT]
+                  [-rev REVADAPT] [-e ERROR] [-p GEOM_P] [-m MIN] [-M MAX]
+                  [-o OUTPUT] [-q QUALITY] [-s STATS] [-se SEED] [-t THREADS]
+                  confFile
 
     Ancient DNA Read Simulator for Metagenomics
 
     positional arguments:
-      confFile       path to configuration file
+    confFile       path to configuration file
 
     optional arguments:
-      -h, --help     show this help message and exit
-      -d DIRECTORY   path to genome directory. Default = .
-      -r READLENGTH  Average read length. Default = 76
-      -n NBINOM      n parameter for Negative Binomial insert length distribution.
-                     Default = 8
-      -fwd FWDADAPT  Forward adaptor. Default = AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC
-                     NNNNNNATCTCGTATGCCGTCTTCTGCTTG
-      -rev REVADAPT  Reverse adaptor. Default =
-                     AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT
-      -e ERROR       Illumina sequecing error. Default = 0.01
-      -p GEOM_P      Geometric distribution parameter for deamination. Default =
-                     0.5
-      -m MIN         Deamination substitution base frequency. Default = 0.001
-      -M MAX         Deamination substitution max frequency. Default = 0.3
-      -o OUTPUT      Output file basename. Default = ./metagenome.*
-      -q QUALITY     Base quality encoding. Default = d (PHRED+64)
-      -s STATS       Statistic file. Default = stats.csv
-      -se SEED       Seed for random generator. Default = 7357
-      -t THREADS     Number of threads for parallel processing. Default = 2
+    -h, --help     show this help message and exit
+    -r READLENGTH  Average read length. Default = 76
+    -n NBINOM      n parameter for Negative Binomial insert length distribution.
+                    Default = 8
+    -fwd FWDADAPT  Forward adaptor. Default = AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC
+                    NNNNNNATCTCGTATGCCGTCTTCTGCTTG
+    -rev REVADAPT  Reverse adaptor. Default =
+                    AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT
+    -e ERROR       Illumina sequecing error. Default = 0.01
+    -p GEOM_P      Geometric distribution parameter for deamination. Default =
+                    0.5
+    -m MIN         Deamination substitution base frequency. Default = 0.001
+    -M MAX         Deamination substitution max frequency. Default = 0.3
+    -o OUTPUT      Output file basename. Default = ./metagenome.*
+    -q QUALITY     Base quality encoding. Default = d (PHRED+64)
+    -s STATS       Statistic file. Default = stats.csv
+    -se SEED       Seed for random generator. Default = 7357
+    -t THREADS     Number of threads for parallel processing. Default = 2
 
 ## Genome directory
 
@@ -78,8 +76,8 @@ Example [short_genome_list.csv](./data/short_genome_list.csv):
 
 | genome(mandatory)            | insert_size(mandatory) | coverage(mandatory) | deamination(mandatory) | mutation_rate(optional) | age(optional) |
 | ---------------------------- | ---------------------- | ------------------- | ---------------------- | ----------------------- | ------------- |
-| Agrobacterium_tumefaciens.fa | 47                     | 0.1                 | yes                    | 10e-8                   | 10000         |
-| Bacillus_anthracis.fa        | 48                     | 0.2                 | no                     |                         |               |
+| ./data/genomes/Agrobacterium_tumefaciens.fa | 47                     | 0.1                 | yes                    | 10e-8                   | 10000         |
+| ./data/genomes/Bacillus_anthracis.fa        | 48                     | 0.2                 | no                     |                         |               |
 
 ## Note on Coverage
 

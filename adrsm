@@ -10,13 +10,16 @@ def _get_args():
     '''This function parses and return arguments passed in'''
     parser = argparse.ArgumentParser(
         prog='ADRSM v' + str(version),
-        description='Ancient DNA Read Simulator for Metagenomics')
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description='''
+==================================================\n
+ADRSM: Ancient DNA Read Simulator for Metagenomics\n
+Author: Maxime Borry\n
+Contact: <borry[at]shh.mpg.de>\n
+Homepage & Documentation: github.com/maxibor/adrsm
+==================================================
+        ''')
     parser.add_argument('confFile', help="path to configuration file")
-    parser.add_argument(
-        '-d',
-        dest="directory",
-        default=".",
-        help="path to genome directory. Default = .")
     parser.add_argument(
         '-r',
         dest='readLength',
@@ -86,7 +89,6 @@ def _get_args():
     args = parser.parse_args()
 
     infile = args.confFile
-    gendir = args.directory
     readlen = int(args.readLength)
     nbinom = int(args.nbinom)
     a1 = args.fwdAdapt
@@ -101,10 +103,10 @@ def _get_args():
     seed = int(args.seed)
     threads = int(args.threads)
 
-    return(infile, gendir, readlen, nbinom, a1, a2, err, geom_p, themin, themax, outfile, quality, stats, seed, threads)
+    return(infile, readlen, nbinom, a1, a2, err, geom_p, themin, themax, outfile, quality, stats, seed, threads)
 
 
-def read_config(infile, gendir):
+def read_config(infile):
     """
     READS CONFIG FILE AND RETURNS CONFIG DICT
     """
@@ -128,20 +130,20 @@ def read_config(infile, gendir):
                 mutrate = 0
                 age = 0
 
-            genomes[gendir + "/" + agenome] = {'size': ainsert,
-                                               'cov': acov, 'deam': deamination, 'mutate': mutate, 'mutrate': mutrate, 'age': age}
+            genomes[agenome] = {'size': ainsert,
+                                'cov': acov, 'deam': deamination, 'mutate': mutate, 'mutrate': mutrate, 'age': age}
     return(genomes)
 
 
 if __name__ == "__main__":
-    version = 0.7
-    INFILE, GENDIR, READLEN, NBINOM, A1, A2, ERR, GEOM_P, THEMIN, THEMAX, OUTFILE, QUALITY, STATS, SEED, PROCESS = _get_args()
+    version = 0.8
+    INFILE, READLEN, NBINOM, A1, A2, ERR, GEOM_P, THEMIN, THEMAX, OUTFILE, QUALITY, STATS, SEED, PROCESS = _get_args()
 
     MINLENGTH = 20
     npr.seed(SEED)
     genome_dict = {}
     stat_dict = {}
-    all_genomes = read_config(INFILE, GENDIR)
+    all_genomes = read_config(INFILE)
     for agenome in all_genomes.keys():
         stat_and_run = ad.run_read_simulation_multi(INFILE=agenome,
                                                     COV=all_genomes[agenome]['cov'],
