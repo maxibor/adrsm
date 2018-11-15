@@ -121,7 +121,7 @@ def read_config(infile):
             acov = float(splitline[2].replace(" ", ""))
             deambool = str(splitline[3].replace(" ", ""))
             deamination = ad.parse_yes_no(deambool)
-            if len(splitline) > 4:
+            if len(splitline) > 4 and float(splitline[4].replace(" ", "")) != 0.0:
                 mutate = True
                 mutrate = float(splitline[4].replace(" ", ""))
                 age = float(splitline[5].replace(" ", ""))

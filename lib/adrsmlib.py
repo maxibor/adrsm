@@ -25,12 +25,12 @@ def get_basename(file_name):
     return(basename)
 
 
-def add_mutation_multi(sequence, mutrate, process):
+def add_mutation_multi(sequences, mutrate, process):
     mutate_partial = partial(sf.mutate, mutrate=mutrate)
     print("Mutating...")
     with multiprocessing.Pool(process) as p:
-        mutseq = p.map(mutate_partial, list(sequence))
-    return("".join(mutseq))
+        mutseq = p.map(mutate_partial, sequences)
+    return(list(mutseq))
 
 
 def reverse_complement_multi(all_inserts, process):
@@ -49,10 +49,16 @@ def read_fasta(file_name):
         result(string): all of the sequences in fasta file, concatenated
     """
     result = ""
+    # fastadict = {}
     with open(file_name, "r") as f:
         for line in f:
-            if not line.startswith(">"):
+            if line[0] == ">":
+                # seqname = line[1:]
+                # fastadict[seqname] = []
+                continue
+            else:
                 line = line.rstrip()
+                # fastadict[seqname].append(line)
                 result = result + line
     return([result, len(result)])
 
@@ -159,12 +165,12 @@ def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MI
     prob = NBINOM / (NBINOM + INSERLEN)
     insert_lengths = npr.negative_binomial(NBINOM, prob, nread)
 
+    all_inserts = sf.random_insert(fasta, insert_lengths, READLEN, MINLENGTH)
+
     if MUTATE:
         correct_mutrate = (MUTRATE * AGE) / fasta[1]
-        fasta[0] = add_mutation_multi(
-            sequence=fasta[0], mutrate=correct_mutrate, process=PROCESS)
-
-    all_inserts = sf.random_insert(fasta, insert_lengths, READLEN, MINLENGTH)
+        all_inserts = add_mutation_multi(
+            sequences=all_inserts, mutrate=correct_mutrate, process=PROCESS)
 
     if DAMAGE:
         all_inserts = add_damage_multi(

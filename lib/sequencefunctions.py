@@ -86,7 +86,7 @@ def add_error(read, error_rate):
     return("".join(read))
 
 
-def mutate(nucleotide, mutrate, alpha=0.4, beta=0.2):
+def mutate(sequence, mutrate, alpha=0.4, beta=0.2):
     """
     alpha: Transitions
     beta: Transversions
@@ -94,9 +94,13 @@ def mutate(nucleotide, mutrate, alpha=0.4, beta=0.2):
     """
     a = int(10 * alpha)
     b = int(10 * beta)
+    newseq = ""
     dmut = {'A': b * ['C'] + b * ['T'] + a * ['G'], 'C': b * ['A'] + b * ['G'] + a * [
         'T'], 'G': b * ['C'] + b * ['T'] + a * ['A'], 'T': b * ['A'] + b * ['G'] + a * ['C']}
-    if npr.random() <= mutrate:
-        new_nucl = random.choice(dmut[nucleotide])
-        return(new_nucl)
-    return(nucleotide)
+    for nuc in sequence:
+        if npr.random() <= mutrate:
+            new_nucl = random.choice(dmut[nuc])
+            newseq += new_nucl
+        else:
+            newseq += nuc
+    return(newseq)
