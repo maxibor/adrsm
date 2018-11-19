@@ -1,3 +1,6 @@
 *.pyc
-*.ipynb
 make_plot/*
+.DS_Store
+r1.fq
+r2.fq
+metagenome.*

@@ -4,8 +4,10 @@ import sys
 import requests
 from numpy import random as npr
 import multiprocessing
+import pickle
 from functools import partial
 from . import sequencefunctions as sf
+from . import markov as mk
 
 
 def parse_yes_no(astring):
@@ -108,21 +110,19 @@ def add_error_multi(all_reads, error_rate, process):
     return(r)
 
 
-def prepare_fastq(fastq_dict, fwd_reads, rev_reads, basename, read_length, quality):
+def prepare_fastq(fastq_dict, fwd_reads, rev_reads, fwd_illu_err, rev_illu_err, basename, read_length):
     fastq_dict[basename] = [[] for i in range(2)]
     cnt = 1
-    for read1, read2 in zip(fwd_reads, rev_reads):
+    for read1, read2, err1, err2 in zip(fwd_reads, rev_reads, fwd_illu_err, rev_illu_err):
         read1 = read1.rstrip()
         read2 = read2.rstrip()
-        readlen1 = len(read1)
-        readlen2 = len(read2)
         towrite_fwd = "@" + basename + "_" + \
             str(cnt) + "/1" + "\n" + read1 + \
-            "\n+\n" + quality * readlen1 + "\n"
+            "\n+\n" + err1 + "\n"
         fastq_dict[basename][0].append(towrite_fwd)
         towrite_rev = "@" + basename + "_" + \
             str(cnt) + "/2" + "\n" + read2 + \
-            "\n+\n" + quality * readlen2 + "\n"
+            "\n+\n" + err2 + "\n"
         fastq_dict[basename][1].append(towrite_rev)
         cnt += 1
     return(fastq_dict)
@@ -138,7 +138,37 @@ def write_fastq_multi(fastq_dict, outputfile):
                     f2.write(reads2)
 
 
-def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MINLENGTH, MUTATE, MUTRATE, AGE, ERR,  DAMAGE, GEOM_P, THEMIN, THEMAX, fastq_dict, QUALITY, PROCESS):
+def markov_wrapper_fwd(times):
+    a = 0
+    while(a == 0):
+        a = mk.mchain(starts=MARKOV_START_FWD, kmers=MARKOV_DICT_FWD,
+                      readsize=READSIZE, order=MARKOV_ORDER)
+    return(a)
+
+
+def markov_wrapper_rev(times):
+    a = 0
+    while(a == 0):
+        a = mk.mchain(starts=MARKOV_START_REV, kmers=MARKOV_DICT_REV,
+                      readsize=READSIZE, order=MARKOV_ORDER)
+    return(a)
+
+
+def markov_multi_fwd(process, nreads):
+    myIter = range(nreads)
+    with multiprocessing.Pool(process) as p:
+        r = p.map(markov_wrapper_fwd, myIter)
+    return(r)
+
+
+def markov_multi_rev(process, nreads):
+    myIter = range(nreads)
+    with multiprocessing.Pool(process) as p:
+        r = p.map(markov_wrapper_rev, myIter)
+    return(r)
+
+
+def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MINLENGTH, MUTATE, MUTRATE, AGE, ERR,  DAMAGE, GEOM_P, THEMIN, THEMAX, fastq_dict, PROCESS):
     print("===================\n===================")
     print("Genome: ", INFILE)
     print("Coverage: ", COV)
@@ -147,12 +177,23 @@ def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MI
     print("n parameter for Negative Binomial insert length distribution: ", NBINOM)
     print("Adaptor 1: ", A1)
     print("Adaptor 2: ", A2)
-    print("Quality :", QUALITY)
     print("Mutation rate (bp/year):", MUTRATE)
     print("Age (years):", AGE)
     print("Sequencing Error rate", ERR)
     print("Deamination:", DAMAGE)
     nread = None
+    global READSIZE
+    global MARKOV_ORDER
+    global QUALIT_FWD
+    global MARKOV_SEED_FWD
+    global MARKOV_START_FWD
+    global MARKOV_DICT_FWD
+    global QUALIT_REV
+    global MARKOV_SEED_REV
+    global MARKOV_START_REV
+    global MARKOV_DICT_REV
+
+    READSIZE = READLEN
 
     basename = get_basename(INFILE)
     fasta = read_fasta(INFILE)
@@ -160,6 +201,18 @@ def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MI
     nread = int((fasta[1] / INSERLEN) * COV)
     print("Number of reads: ", nread)
     print("-------------------")
+
+    MARKOV_ORDER = 7
+    QUALIT_FWD = pickle.load(open('data/quality/fwd_qual.p', 'rb'))
+    QUALIT_REV = pickle.load(open('data/quality/rev_qual.p', 'rb'))
+    MARKOV_SEED_FWD = mk.generate_kmer(
+        qualities=QUALIT_FWD, order=MARKOV_ORDER, readsize=READLEN)
+    MARKOV_SEED_REV = mk.generate_kmer(
+        qualities=QUALIT_REV, order=MARKOV_ORDER, readsize=READLEN)
+    MARKOV_START_FWD = MARKOV_SEED_FWD[0]
+    MARKOV_START_REV = MARKOV_SEED_REV[0]
+    MARKOV_DICT_FWD = MARKOV_SEED_FWD[1]
+    MARKOV_DICT_REV = MARKOV_SEED_REV[1]
 
     # negative_binomial parameters
     prob = NBINOM / (NBINOM + INSERLEN)
@@ -190,19 +243,23 @@ def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MI
     print("Adding sequencing error to forward read...")
     # fwd_reads = add_error_single(fwd_reads, ERR)
     fwd_reads = add_error_multi(fwd_reads, ERR, PROCESS)
+    fwd_illu_err = markov_multi_fwd(process=PROCESS, nreads=len(fwd_reads))
     print("Adding adaptors to reverse read...")
     # rev_reads = complement_read_single(rev_inserts, A2, READLEN)
     rev_reads = complement_read_multi(rev_inserts, A2, READLEN, PROCESS)
     print("Adding sequencing error to reverse read...")
     # rev_reads = add_error_single(rev_reads, ERR)
     rev_reads = add_error_multi(rev_reads, ERR, PROCESS)
+    rev_illu_err = markov_multi_rev(process=PROCESS, nreads=len(rev_reads))
 
     prepare_fastq(fastq_dict=fastq_dict,
                   fwd_reads=fwd_reads,
                   rev_reads=rev_reads,
+                  fwd_illu_err=fwd_illu_err,
+                  rev_illu_err=rev_illu_err,
                   basename=basename,
-                  read_length=READLEN,
-                  quality=QUALITY)
+                  read_length=READLEN
+                  )
     return([nread * INSERLEN, INSERLEN, COV, DAMAGE])
 
 

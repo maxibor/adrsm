@@ -116,6 +116,11 @@ If `Pg >= Pu`, the base is substituted (fig 3).
 
 ADRSM can simulate Illumina sequencing error with a uniform based model.
 
+## Note on Illumina base quality score
+
+The base quality score is generated using a Markov chain from fastq template files.
+
+
 ## Note on mutation
 
 ADRSM offers you to add [mutation](https://en.wikipedia.org/wiki/Mutation_rate) to your sequences. This allows to account for the evolutionary differences between ancient organisms and their reference genome counterparts present in today's databases.

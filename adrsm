@@ -2,7 +2,6 @@
 
 from numpy import random as npr
 import lib.adrsmlib as ad
-
 import argparse
 
 
@@ -66,11 +65,6 @@ Homepage & Documentation: github.com/maxibor/adrsm
         default="metagenome",
         help="Output file basename. Default = ./metagenome.*")
     parser.add_argument(
-        '-q',
-        dest="quality",
-        default="d",
-        help="Base quality encoding. Default = d (PHRED+64)")
-    parser.add_argument(
         '-s',
         dest="stats",
         default="stats.csv",
@@ -98,12 +92,11 @@ Homepage & Documentation: github.com/maxibor/adrsm
     themin = args.min
     themax = args.max
     outfile = args.output
-    quality = args.quality
     stats = args.stats
     seed = int(args.seed)
     threads = int(args.threads)
 
-    return(infile, readlen, nbinom, a1, a2, err, geom_p, themin, themax, outfile, quality, stats, seed, threads)
+    return(infile, readlen, nbinom, a1, a2, err, geom_p, themin, themax, outfile, stats, seed, threads)
 
 
 def read_config(infile):
@@ -137,7 +130,7 @@ def read_config(infile):
 
 if __name__ == "__main__":
     version = 0.8
-    INFILE, READLEN, NBINOM, A1, A2, ERR, GEOM_P, THEMIN, THEMAX, OUTFILE, QUALITY, STATS, SEED, PROCESS = _get_args()
+    INFILE, READLEN, NBINOM, A1, A2, ERR, GEOM_P, THEMIN, THEMAX, OUTFILE, STATS, SEED, PROCESS = _get_args()
 
     MINLENGTH = 20
     npr.seed(SEED)
@@ -162,7 +155,6 @@ if __name__ == "__main__":
                                                     THEMIN=THEMIN,
                                                     THEMAX=THEMAX,
                                                     fastq_dict=genome_dict,
-                                                    QUALITY=QUALITY,
                                                     PROCESS=PROCESS)
         stat_dict[ad.get_basename(agenome)] = stat_and_run
 
