@@ -172,26 +172,28 @@ def markov_multi_rev(process, nreads):
 
 def get_fwd_qual():
     try:
-        pickle.load(open("fwd_qual.p", 'rb'))
+        ret = pickle.load(open("data/quality/fwd_qual.p", 'rb'))
+        return(ret)
     except FileNotFoundError:
         cmd = "which adrsm"
         res = subprocess.check_output(cmd, shell=True)
         res = res.decode('utf-8').rstrip()
         path = "/".join(res.split("/")[:-2])+"/data/quality/fwd_qual.p"
         ret = pickle.load(open(path, 'rb'))
-    return(ret)
+        return(ret)
 
 
 def get_rev_qual():
     try:
-        pickle.load(open("fwd_qual.p", 'rb'))
+        ret = pickle.load(open("data/quality/fwd_qual.p", 'rb'))
+        return(ret)
     except FileNotFoundError:
         cmd = "which adrsm"
         res = subprocess.check_output(cmd, shell=True)
         res = res.decode('utf-8').rstrip()
         path = "/".join(res.split("/")[:-2])+"/data/quality/rev_qual.p"
         ret = pickle.load(open(path, 'rb'))
-    return(ret)
+        return(ret)
 
 
 def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MINLENGTH, MUTATE, MUTRATE, AGE, ERR,  DAMAGE, GEOM_P, THEMIN, THEMAX, fastq_dict, PROCESS):
