@@ -36,9 +36,9 @@ You can cite ADRSM like this:
 # Help
 
     $ adrsm --help
-    usage: ADRSM v0.8 [-h] [-r READLENGTH] [-n NBINOM] [-fwd FWDADAPT]
+    usage: ADRSM v0.9 [-h] [-r READLENGTH] [-n NBINOM] [-fwd FWDADAPT]
                   [-rev REVADAPT] [-e ERROR] [-p GEOM_P] [-m MIN] [-M MAX]
-                  [-o OUTPUT] [-q QUALITY] [-s STATS] [-se SEED] [-t THREADS]
+                  [-o OUTPUT] [-s STATS] [-se SEED] [-t THREADS]
                   confFile
 
     ==================================================
@@ -71,7 +71,6 @@ You can cite ADRSM like this:
     -m MIN         Deamination substitution base frequency. Default = 0.001
     -M MAX         Deamination substitution max frequency. Default = 0.3
     -o OUTPUT      Output file basename. Default = ./metagenome.*
-    -q QUALITY     Base quality encoding. Default = d (PHRED+64)
     -s STATS       Statistic file. Default = stats.csv
     -se SEED       Seed for random generator. Default = 7357
     -t THREADS     Number of threads for parallel processing. Default = 2

@@ -129,7 +129,7 @@ def read_config(infile):
 
 
 if __name__ == "__main__":
-    version = 0.8
+    version = 0.9
     INFILE, READLEN, NBINOM, A1, A2, ERR, GEOM_P, THEMIN, THEMAX, OUTFILE, STATS, SEED, PROCESS = _get_args()
 
     MINLENGTH = 20
