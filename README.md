@@ -1,4 +1,6 @@
-[![Anaconda-Server Badge](https://anaconda.org/maxibor/adrsm/badges/installer/conda.svg)](https://anaconda.org/maxibor/adrsm) [![Build Status](https://travis-ci.org/maxibor/adrsm.svg?branch=master)](https://travis-ci.org/maxibor/adrsm)[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1486129.svg)](https://doi.org/10.5281/zenodo.1486129)
+[![Anaconda-Server Badge](https://anaconda.org/maxibor/adrsm/badges/installer/conda.svg)](https://anaconda.org/maxibor/adrsm) [![Build Status](https://travis-ci.org/maxibor/adrsm.svg?branch=master)](https://travis-ci.org/maxibor/adrsm)[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1491645.svg)](https://doi.org/10.5281/zenodo.1491645)
+
+
 
 
 
@@ -31,7 +33,7 @@ ADRSM (Ancient DNA Read Simulator for Metagenomics) is a tool designed to simula
 
 You can cite ADRSM like this:
 
-    Maxime Borry (2018). ADRSM: Ancient DNA Read Simulator for Metagenomics. DOI: 10.5281/zenodo.1486129
+    Maxime Borry (2018). ADRSM: Ancient DNA Read Simulator for Metagenomics. DOI: 10.5281/zenodo.1491645
 
 # Help
 
