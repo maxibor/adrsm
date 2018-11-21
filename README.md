@@ -1,4 +1,5 @@
-[![Anaconda-Server Badge](https://anaconda.org/maxibor/adrsm/badges/installer/conda.svg)](https://anaconda.org/maxibor/adrsm) [![Build Status](https://travis-ci.org/maxibor/adrsm.svg?branch=master)](https://travis-ci.org/maxibor/adrsm)[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1462743.svg)](https://doi.org/10.5281/zenodo.1462743)
+[![ADRSM version](https://img.shields.io/badge/adrsm-v0.9.2-blue.svg)](https://github.com/maxibor/adrsm) [![Build Status](https://travis-ci.org/maxibor/adrsm.svg?branch=master)](https://travis-ci.org/maxibor/adrsm)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1462743.svg)](https://doi.org/10.5281/zenodo.1462743) [![Anaconda-Server Badge](https://anaconda.org/maxibor/adrsm/badges/installer/conda.svg)](https://anaconda.org/maxibor/adrsm)  
 
 
 
@@ -12,7 +13,7 @@
 
 ADRSM (Ancient DNA Read Simulator for Metagenomics) is a tool designed to simulate the paired-end sequencing of a metagenomic community. ADRSM allows you to control precisely the amount of DNA from each organism in the community, which can be used, for example, to benchmark different metagenomics methods.
 
-# Dependencies
+# Requirements
 
 -   [Conda](https://conda.io/miniconda.html)  
 
@@ -38,10 +39,10 @@ You can cite ADRSM like this:
 # Help
 
     $ adrsm --help
-    usage: ADRSM v0.9 [-h] [-r READLENGTH] [-n NBINOM] [-fwd FWDADAPT]
-                  [-rev REVADAPT] [-e ERROR] [-p GEOM_P] [-m MIN] [-M MAX]
-                  [-o OUTPUT] [-s STATS] [-se SEED] [-t THREADS]
-                  confFile
+    usage: ADRSM v0.9.2 [-h] [-r READLENGTH] [-n NBINOM] [-fwd FWDADAPT]
+                    [-rev REVADAPT] [-p GEOM_P] [-m MIN] [-M MAX] [-o OUTPUT]
+                    [-s STATS] [-se SEED] [-t THREADS]
+                    confFile
 
     ==================================================
 
@@ -67,7 +68,6 @@ You can cite ADRSM like this:
                     NNNNNNATCTCGTATGCCGTCTTCTGCTTG
     -rev REVADAPT  Reverse adaptor. Default =
                     AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT
-    -e ERROR       Illumina sequecing error. Default = 0.01
     -p GEOM_P      Geometric distribution parameter for deamination. Default =
                     0.5
     -m MIN         Deamination substitution base frequency. Default = 0.001
@@ -79,8 +79,16 @@ You can cite ADRSM like this:
 
 ## Configuration file (`confFile`)
 
-The configuration file is a `.csv` file describing, one line per genome, the mean insert size, and the expected genome coverage.
-Example [short_genome_list.csv](./data/short_genome_list.csv):
+The configuration `.csv` file describes, one line per genome, the different simulation parameters :
+- the file path to the genome fasta file - **mandatory**
+- the mean insert size (integer) - **mandatory**
+- the coverage (float) - **mandatory**
+- the deamination (yes | no) - **mandatory**
+- the mutation rate (0<float<1) - **optional** 
+- the age (integer) - **optional** 
+
+
+**Example:** [**short_genome_list.csv**](./data/short_genome_list.csv)
 
 | genome(mandatory)            | insert_size(mandatory) | coverage(mandatory) | deamination(mandatory) | mutation_rate(optional) | age(optional) |
 | ---------------------------- | ---------------------- | ------------------- | ---------------------- | ----------------------- | ------------- |
@@ -113,18 +121,18 @@ If `Pg >= Pu`, the base is substituted (fig 3).
 
 **Figure 3:** Substitutions distribution along a DNA insert, with default parameters.
 
-## Note on sequencing error
-
-ADRSM can simulate Illumina sequencing error with a uniform based model.
-
 ## Note on Illumina base quality score
 
-The base quality score is generated using a Markov chain from fastq template files.
+The base quality score (Qscore) is generated using a Markov chain from fastq template files.
 
+## Note on sequencing error
+
+Until version 0.9.1, ADRSM simulated Illumina sequencing error with a uniform based model.
+From version 0.9.2 onwards, ADRSM simulates the sequencing error based on the [QScore](https://support.illumina.com/help/BaseSpace_OLH_009008/Content/Source/Informatics/BS/QualityScoreEncoding_swBS.htm).
 
 ## Note on mutation
 
-ADRSM offers you to add [mutation](https://en.wikipedia.org/wiki/Mutation_rate) to your sequences. This allows to account for the evolutionary differences between ancient organisms and their reference genome counterparts present in today's databases.
+ADRSM can add [mutations](https://en.wikipedia.org/wiki/Mutation_rate) to your sequences. This allows to account for the evolutionary differences between ancient organisms and their reference genome counterparts present in today's databases.
 
 ADRSM assumes two times more transitions than transversions.
 

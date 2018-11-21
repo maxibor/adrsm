@@ -2,6 +2,7 @@ import numpy as np
 from numpy import random as npr
 from scipy.stats import geom
 import random
+from . import quality
 
 
 def random_insert(read_fasta_out, insert_lengths, read_length, minlen):
@@ -10,7 +11,7 @@ def random_insert(read_fasta_out, insert_lengths, read_length, minlen):
     result = []
     for i in insert_lengths:
         if i >= minlen:
-            insert_start = npr.randint(0, genome_length - read_length)
+            insert_start = npr.randint(0, genome_length - i - 1)
             insert_end = insert_start + i + 1
             insert = genome[insert_start:insert_end]
             result.append(insert)
@@ -33,7 +34,6 @@ def reverse_complement(dna):
         for key in complement.keys():
             if letter == key:
                 revcom.append(complement[key])
-
     return "".join(revcom)
 
 
@@ -53,7 +53,8 @@ def complement_read(insert, adaptor, read_length):
         for j in range(0, len(read)):
             if read[j] not in ["A", "T", "G", "C", "N"]:
                 read[j] = "N"
-        return("".join(read))
+    result = "".join(read)
+    return(result)
 
 
 def add_damage(insert, geom_p, scale_min, scale_max):
@@ -73,7 +74,8 @@ def add_damage(insert, geom_p, scale_min, scale_max):
         # G -> A deamination
         if insert[opp_pos] == "G" and geom_dist[j] >= npr.rand():
             insert[opp_pos] = "A"
-    return("".join(insert))
+    result = "".join(insert)
+    return(result)
 
 
 def add_error(read, error_rate):
@@ -82,6 +84,17 @@ def add_error(read, error_rate):
         if read[j].upper() not in ["A", "T", "G", "C", "N"]:
             read[j] = "N"
         if npr.random() < error_rate:
+            read[j] = npr.choice(["A", "T", "G", "C"])
+    return("".join(read))
+
+
+def add_error_phred(read, phred):
+    read = list(read)
+    phred = list(phred)
+    for j in range(0, len(read)):
+        if read[j].upper() not in ["A", "T", "G", "C", "N"]:
+            read[j] = "N"
+        elif npr.random() < quality.qdict[phred[j]]:
             read[j] = npr.choice(["A", "T", "G", "C"])
     return("".join(read))
 

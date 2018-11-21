@@ -40,11 +40,6 @@ Homepage & Documentation: github.com/maxibor/adrsm
         default="AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT",
         help="Reverse adaptor. Default = AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT")
     parser.add_argument(
-        '-e',
-        dest="error",
-        default=0.01,
-        help="Illumina sequecing error. Default = 0.01")
-    parser.add_argument(
         '-p',
         dest="geom_p",
         default=0.5,
@@ -87,7 +82,6 @@ Homepage & Documentation: github.com/maxibor/adrsm
     nbinom = int(args.nbinom)
     a1 = args.fwdAdapt
     a2 = args.revAdapt
-    err = float(args.error)
     geom_p = args.geom_p
     themin = args.min
     themax = args.max
@@ -96,7 +90,7 @@ Homepage & Documentation: github.com/maxibor/adrsm
     seed = int(args.seed)
     threads = int(args.threads)
 
-    return(infile, readlen, nbinom, a1, a2, err, geom_p, themin, themax, outfile, stats, seed, threads)
+    return(infile, readlen, nbinom, a1, a2, geom_p, themin, themax, outfile, stats, seed, threads)
 
 
 def read_config(infile):
@@ -129,8 +123,8 @@ def read_config(infile):
 
 
 if __name__ == "__main__":
-    version = "0.9.1"
-    INFILE, READLEN, NBINOM, A1, A2, ERR, GEOM_P, THEMIN, THEMAX, OUTFILE, STATS, SEED, PROCESS = _get_args()
+    version = "0.9.2"
+    INFILE, READLEN, NBINOM, A1, A2, GEOM_P, THEMIN, THEMAX, OUTFILE, STATS, SEED, PROCESS = _get_args()
 
     MINLENGTH = 20
     npr.seed(SEED)
@@ -149,7 +143,6 @@ if __name__ == "__main__":
                                                     MUTATE=all_genomes[agenome]['mutate'],
                                                     MUTRATE=all_genomes[agenome]['mutrate'],
                                                     AGE=all_genomes[agenome]['age'],
-                                                    ERR=ERR,
                                                     DAMAGE=all_genomes[agenome]['deam'],
                                                     GEOM_P=GEOM_P,
                                                     THEMIN=THEMIN,

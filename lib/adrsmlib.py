@@ -63,7 +63,7 @@ def read_fasta(file_name):
             else:
                 line = line.rstrip()
                 # fastadict[seqname].append(line)
-                result = result + line
+                result += line
     return([result, len(result)])
 
 
@@ -100,15 +100,34 @@ def add_damage_multi(all_inserts, geom_p, scale_min, scale_max, process):
 
 
 def add_error_single(all_reads, error_rate):
+    all_reads_mod = []
     for i in range(0, len(all_reads)):
-        all_reads[i] = sf.add_error(read=i, error_rate=error_rate)
-    return(all_reads)
+        all_reads_mod.append(sf.add_error(
+            read=all_reads[i], error_rate=error_rate))
+    return(all_reads_mod)
+
+
+def add_error_single_phred(all_reads, all_quals):
+    all_reads_mod = []
+    for i in range(0, len(all_reads)):
+        all_reads_mod.append(sf.add_error_phred(
+            read=all_reads[i], phred=all_quals[i]))
+    return(all_reads_mod)
 
 
 def add_error_multi(all_reads, error_rate, process):
     add_error_partial = partial(sf.add_error, error_rate=error_rate)
     with multiprocessing.Pool(process) as p:
         r = p.map(add_error_partial, all_reads)
+    return(r)
+
+
+def add_error_multi_phred(all_reads, all_quals, process):
+    to_multi = []
+    for r, q in zip(all_reads, all_quals):
+        to_multi.append([r, q])
+    with multiprocessing.Pool(process) as p:
+        r = p.starmap(sf.add_error_phred, to_multi)
     return(r)
 
 
@@ -196,7 +215,7 @@ def get_rev_qual():
         return(ret)
 
 
-def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MINLENGTH, MUTATE, MUTRATE, AGE, ERR,  DAMAGE, GEOM_P, THEMIN, THEMAX, fastq_dict, PROCESS):
+def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MINLENGTH, MUTATE, MUTRATE, AGE, DAMAGE, GEOM_P, THEMIN, THEMAX, fastq_dict, PROCESS):
     print("===================\n===================")
     print("Genome: ", INFILE)
     print("Coverage: ", COV)
@@ -207,7 +226,6 @@ def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MI
     print("Adaptor 2: ", A2)
     print("Mutation rate (bp/year):", MUTRATE)
     print("Age (years):", AGE)
-    print("Sequencing Error rate", ERR)
     print("Deamination:", DAMAGE)
     nread = None
     global READSIZE
@@ -270,15 +288,19 @@ def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MI
     fwd_reads = complement_read_multi(fwd_inserts, A1, READLEN, PROCESS)
     print("Adding sequencing error to forward read...")
     # fwd_reads = add_error_single(fwd_reads, ERR)
-    fwd_reads = add_error_multi(fwd_reads, ERR, PROCESS)
     fwd_illu_err = markov_multi_fwd(process=PROCESS, nreads=len(fwd_reads))
+    # fwd_reads = add_error_multi(fwd_reads, ERR, PROCESS)
+    fwd_reads = add_error_multi_phred(
+        all_reads=fwd_reads, all_quals=fwd_illu_err, process=PROCESS)
     print("Adding adaptors to reverse read...")
     # rev_reads = complement_read_single(rev_inserts, A2, READLEN)
     rev_reads = complement_read_multi(rev_inserts, A2, READLEN, PROCESS)
     print("Adding sequencing error to reverse read...")
     # rev_reads = add_error_single(rev_reads, ERR)
-    rev_reads = add_error_multi(rev_reads, ERR, PROCESS)
     rev_illu_err = markov_multi_rev(process=PROCESS, nreads=len(rev_reads))
+    # rev_reads = add_error_multi(rev_reads, ERR, PROCESS)
+    rev_reads = add_error_multi_phred(
+        all_reads=rev_reads, all_quals=rev_illu_err, process=PROCESS)
 
     prepare_fastq(fastq_dict=fastq_dict,
                   fwd_reads=fwd_reads,
