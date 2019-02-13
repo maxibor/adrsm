@@ -4,3 +4,4 @@ make_plot/*
 r1.fq
 r2.fq
 metagenome.*
+stats.csv

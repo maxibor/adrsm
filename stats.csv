@@ -1,3 +1,0 @@
-Organism,taxonomy_id,percentage of metagenome,mean_insert_length,target_coverage,deamination
-Agrobacterium_tumefaciens,358,0.36,47,0.1,True
-Bacillus_anthracis,1392,0.64,48,0.2,False
