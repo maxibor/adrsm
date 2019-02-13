@@ -24,7 +24,7 @@ def scale(x, themin, themax):
 
 class fragment ():
 
-    def __init__(self, sequence, num, name):
+    def __init__(self, sequence, num, name, fwd_phred, rev_phred):
         """
         sequence(str) nucleotide sequence of fragment
         num(int) id of the sequence
@@ -33,6 +33,8 @@ class fragment ():
         self.seq = sequence.upper()
         self.id = num
         self.name = name
+        self.fwd_phred = fwd_phred
+        self.rev_phred = rev_phred
 
     def __repr__(self):
         return(f"A fragment class object of sequence {self.seq}")
@@ -165,18 +167,18 @@ class fragment ():
         self.rev_read = "".join(read)
         return(self.rev_read)
 
-    def add_error_fwd(self, phred):
+    def add_error_fwd(self):
         read = list(self.fwd_read)
-        phred = list(phred)
+        phred = list(self.fwd_phred)
         for j in range(0, len(read)):
             if npr.random() < quality.qdict[phred[j]]:
                 read[j] = npr.choice(["A", "T", "G", "C"])
         self.fwd_err = "".join(read)
         return(self.fwd_err)
 
-    def add_error_rev(self, phred):
+    def add_error_rev(self):
         read = list(self.rev_read)
-        phred = list(phred)
+        phred = list(self.rev_phred)
         for j in range(0, len(read)):
             if npr.random() < quality.qdict[phred[j]]:
                 read[j] = npr.choice(["A", "T", "G", "C"])
@@ -184,11 +186,11 @@ class fragment ():
         return(self.rev_err)
 
     def combine_fwd(self):
-        self.fwd_fq = f"@{self.name}_{self.id}/1\n{self.fwd_read}\n+\n{self.fwd_err}"
+        self.fwd_fq = f"@{self.name}_{self.id}/1\n{self.fwd_err}\n+\n{self.fwd_phred}"
         return(self.fwd_fq)
 
     def combine_rev(self):
-        self.rev_fq = f"@{self.name}_{self.id}/2\n{self.rev_read}\n+\n{self.rev_err}"
+        self.rev_fq = f"@{self.name}_{self.id}/2\n{self.rev_err}\n+\n{self.rev_phred}"
         return(self.rev_fq)
 
 
@@ -203,7 +205,8 @@ def generate_fq(iterables, name,  mutate, mutrate, damage, geom_p, themin, thema
     phred_fwd = iterables[1]
     phred_rev = iterables[2]
     num = iterables[3]
-    frg = fragment(sequence=frag, num=num, name=name)
+    frg = fragment(sequence=frag, num=num, name=name,
+                   fwd_phred=phred_fwd, rev_phred=phred_rev)
     frg.reverse_complement()
     if mutate:
         frg.mutate_fwd(mutrate=mutrate)
@@ -213,8 +216,8 @@ def generate_fq(iterables, name,  mutate, mutrate, damage, geom_p, themin, thema
         frg.add_damage_rev(geom_p=geom_p, scale_min=themin, scale_max=themax)
     frg.complement_read_fwd(adaptor=fwd_adaptor, read_length=read_length)
     frg.complement_read_rev(adaptor=rev_adaptor, read_length=read_length)
-    frg.add_error_fwd(phred=phred_fwd)
-    frg.add_error_rev(phred=phred_rev)
+    frg.add_error_fwd()
+    frg.add_error_rev()
     frg.combine_fwd()
     frg.combine_rev()
-    return([frg.fwd_fq, frg.fwd_fq])
+    return([frg.fwd_fq, frg.rev_fq])
