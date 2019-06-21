@@ -1,0 +1,25 @@
+package:
+  name: adrsm
+  version: "0.9.2"
+
+source:
+  path: ../
+
+requirements:
+  run:
+    - python 3.6.*
+    - numpy
+    - scipy
+    - requests
+
+
+test:
+  source_files:
+    - data
+  commands:
+    - adrsm --help
+
+about:
+  home: https://github.com/maxibor/adrsm
+  license: MIT
+  summary: 'Ancient DNA Read Simulator for Metagenomics'
