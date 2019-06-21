@@ -151,8 +151,8 @@ if __name__ == "__main__":
                                                     PROCESS=PROCESS)
         stat_dict[ad.get_basename(agenome)] = stat_and_run
 
-    ad.write_fastq_multi(fastq_dict=genome_dict, outputfile=OUTFILE)
-    ad.write_stat(stat_dict=stat_dict, stat_out=STATS)
+    # ad.write_fastq_multi(fastq_dict=genome_dict, outputfile=OUTFILE)
+    # ad.write_stat(stat_dict=stat_dict, stat_out=STATS)
     print("\n-- ADRSM v" + str(version) +
           " finished generating this mock metagenome --")
     print("-- FASTQ files written to " + OUTFILE +

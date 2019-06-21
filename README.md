@@ -1,5 +1,4 @@
-[![ADRSM version](https://img.shields.io/badge/adrsm-v0.9.2-blue.svg)](https://github.com/maxibor/adrsm) [![Build Status](https://travis-ci.org/maxibor/adrsm.svg?branch=master)](https://travis-ci.org/maxibor/adrsm)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1462743.svg)](https://doi.org/10.5281/zenodo.1462743) [![Anaconda-Server Badge](https://anaconda.org/maxibor/adrsm/badges/installer/conda.svg)](https://anaconda.org/maxibor/adrsm)  
+[![ADRSM version](https://img.shields.io/badge/adrsm-v0.9.2-blue.svg)](https://github.com/maxibor/adrsm) [![Build Status](https://travis-ci.org/maxibor/adrsm.svg?branch=master)](https://travis-ci.org/maxibor/adrsm) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1462743.svg)](https://doi.org/10.5281/zenodo.1462743) [![Anaconda-Server Badge](https://anaconda.org/maxibor/adrsm/badges/installer/conda.svg)](https://anaconda.org/maxibor/adrsm)  
 
 
 

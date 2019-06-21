@@ -29,21 +29,6 @@ def get_basename(file_name):
     return(basename)
 
 
-def add_mutation_multi(sequences, mutrate, process):
-    mutate_partial = partial(sf.mutate, mutrate=mutrate)
-    print("Mutating...")
-    with multiprocessing.Pool(process) as p:
-        mutseq = p.map(mutate_partial, sequences)
-    return(list(mutseq))
-
-
-def reverse_complement_multi(all_inserts, process):
-    print("Reverse Complemeting...")
-    with multiprocessing.Pool(process) as p:
-        r = p.map(sf.reverse_complement, all_inserts)
-    return(r)
-
-
 def read_fasta(file_name):
     """
     READS FASTA FILE, RETURNS SEQUENCE AS STRING
@@ -65,88 +50,6 @@ def read_fasta(file_name):
                 # fastadict[seqname].append(line)
                 result += line
     return([result, len(result)])
-
-
-def complement_read_single(all_inserts, adaptor, read_length):
-    result = []
-    for insert in all_inserts:
-        result.append(sf.complement_read(
-            insert, adaptor=adaptor, read_length=read_length))
-    return(result)
-
-
-def complement_read_multi(all_inserts, adaptor, read_length, process):
-    complement_read_partial = partial(
-        sf.complement_read, adaptor=adaptor, read_length=read_length)
-    with multiprocessing.Pool(process) as p:
-        r = p.map(complement_read_partial, all_inserts)
-    return(r)
-
-
-def add_damage_single(all_inserts, geom_p, scale_min, scale_max):
-    for i in range(0, len(all_inserts)):
-        all_inserts[i] = sf.add_damage(
-            insert=geom_p, scale_min=scale_min, scale_max=scale_max)
-    return(all_inserts)
-
-
-def add_damage_multi(all_inserts, geom_p, scale_min, scale_max, process):
-    add_damage_partial = partial(
-        sf.add_damage, geom_p=geom_p, scale_min=scale_min, scale_max=scale_max)
-    print("Adding damage...")
-    with multiprocessing.Pool(process) as p:
-        r = p.map(add_damage_partial, all_inserts)
-    return(r)
-
-
-def add_error_single(all_reads, error_rate):
-    all_reads_mod = []
-    for i in range(0, len(all_reads)):
-        all_reads_mod.append(sf.add_error(
-            read=all_reads[i], error_rate=error_rate))
-    return(all_reads_mod)
-
-
-def add_error_single_phred(all_reads, all_quals):
-    all_reads_mod = []
-    for i in range(0, len(all_reads)):
-        all_reads_mod.append(sf.add_error_phred(
-            read=all_reads[i], phred=all_quals[i]))
-    return(all_reads_mod)
-
-
-def add_error_multi(all_reads, error_rate, process):
-    add_error_partial = partial(sf.add_error, error_rate=error_rate)
-    with multiprocessing.Pool(process) as p:
-        r = p.map(add_error_partial, all_reads)
-    return(r)
-
-
-def add_error_multi_phred(all_reads, all_quals, process):
-    to_multi = []
-    for r, q in zip(all_reads, all_quals):
-        to_multi.append([r, q])
-    with multiprocessing.Pool(process) as p:
-        r = p.starmap(sf.add_error_phred, to_multi)
-    return(r)
-
-
-def prepare_fastq(fastq_dict, fwd_reads, rev_reads, fwd_illu_err, rev_illu_err, basename, read_length):
-    fastq_dict[basename] = [[] for i in range(2)]
-    cnt = 1
-    for read1, read2, err1, err2 in zip(fwd_reads, rev_reads, fwd_illu_err, rev_illu_err):
-        read1 = read1.rstrip()
-        read2 = read2.rstrip()
-        towrite_fwd = "@" + basename + "_" + \
-            str(cnt) + "/1" + "\n" + read1 + \
-            "\n+\n" + err1 + "\n"
-        fastq_dict[basename][0].append(towrite_fwd)
-        towrite_rev = "@" + basename + "_" + \
-            str(cnt) + "/2" + "\n" + read2 + \
-            "\n+\n" + err2 + "\n"
-        fastq_dict[basename][1].append(towrite_rev)
-        cnt += 1
-    return(fastq_dict)
 
 
 def write_fastq_multi(fastq_dict, outputfile):
@@ -215,6 +118,23 @@ def get_rev_qual():
         return(ret)
 
 
+def multi_run(iterables, name,  mutate, mutrate, damage, geom_p, themin, themax, fwd_adaptor, rev_adaptor, read_length, process):
+    partial_run = partial(sf.generate_fq,
+                          name=name,
+                          mutate=mutate,
+                          mutrate=mutrate,
+                          damage=damage,
+                          geom_p=geom_p,
+                          themin=themin,
+                          themax=themax,
+                          fwd_adaptor=fwd_adaptor,
+                          rev_adaptor=rev_adaptor,
+                          read_length=read_length)
+    with multiprocessing.Pool(process) as p:
+        r = p.map(partial_run, iterables)
+    return(r)
+
+
 def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MINLENGTH, MUTATE, MUTRATE, AGE, DAMAGE, GEOM_P, THEMIN, THEMAX, fastq_dict, PROCESS):
     print("===================\n===================")
     print("Genome: ", INFILE)
@@ -248,7 +168,7 @@ def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MI
     print("Number of reads: ", nread)
     print("-------------------")
 
-    MARKOV_ORDER = 7
+    MARKOV_ORDER = 10
     QUALIT_FWD = get_fwd_qual()
     QUALIT_REV = get_rev_qual()
     MARKOV_SEED_FWD = mk.generate_kmer(
@@ -262,55 +182,45 @@ def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MI
 
     # negative_binomial parameters
     prob = NBINOM / (NBINOM + INSERLEN)
-    insert_lengths = npr.negative_binomial(NBINOM, prob, nread)
+    fragment_lengths = npr.negative_binomial(NBINOM, prob, nread)
 
-    all_inserts = sf.random_insert(fasta, insert_lengths, READLEN, MINLENGTH)
-
+    # Define Mutation rate
     if MUTATE:
         correct_mutrate = (MUTRATE * AGE) / fasta[1]
-        all_inserts = add_mutation_multi(
-            sequences=all_inserts, mutrate=correct_mutrate, process=PROCESS)
+    else:
+        correct_mutrate = 0
 
-    if DAMAGE:
-        all_inserts = add_damage_multi(
-            all_inserts=all_inserts,
-            geom_p=GEOM_P,
-            scale_min=THEMIN,
-            scale_max=THEMAX,
-            process=PROCESS)
+    # Prepare fragments and errors
+    all_fragments = sf.random_insert(
+        fasta, fragment_lengths, READLEN, MINLENGTH)
+    fwd_illu_err = markov_multi_fwd(process=PROCESS, nreads=len(all_fragments))
+    rev_illu_err = markov_multi_rev(process=PROCESS, nreads=len(all_fragments))
 
-    fwd_inserts = all_inserts
-    # rev_inserts = [sf.reverse_complement(i) for i in all_inserts]
-    rev_inserts = reverse_complement_multi(
-        all_inserts=all_inserts, process=PROCESS)
-    print("Adding adaptors to forward read...")
-    # fwd_reads = complement_read_single(fwd_inserts, A1, READLEN)
-    fwd_reads = complement_read_multi(fwd_inserts, A1, READLEN, PROCESS)
-    print("Adding sequencing error to forward read...")
-    # fwd_reads = add_error_single(fwd_reads, ERR)
-    fwd_illu_err = markov_multi_fwd(process=PROCESS, nreads=len(fwd_reads))
-    # fwd_reads = add_error_multi(fwd_reads, ERR, PROCESS)
-    fwd_reads = add_error_multi_phred(
-        all_reads=fwd_reads, all_quals=fwd_illu_err, process=PROCESS)
-    print("Adding adaptors to reverse read...")
-    # rev_reads = complement_read_single(rev_inserts, A2, READLEN)
-    rev_reads = complement_read_multi(rev_inserts, A2, READLEN, PROCESS)
-    print("Adding sequencing error to reverse read...")
-    # rev_reads = add_error_single(rev_reads, ERR)
-    rev_illu_err = markov_multi_rev(process=PROCESS, nreads=len(rev_reads))
-    # rev_reads = add_error_multi(rev_reads, ERR, PROCESS)
-    rev_reads = add_error_multi_phred(
-        all_reads=rev_reads, all_quals=rev_illu_err, process=PROCESS)
+    runlist = sf.prepare_run(all_frag=all_fragments,
+                             all_fwd_err=fwd_illu_err, all_rev_err=rev_illu_err)
 
-    prepare_fastq(fastq_dict=fastq_dict,
-                  fwd_reads=fwd_reads,
-                  rev_reads=rev_reads,
-                  fwd_illu_err=fwd_illu_err,
-                  rev_illu_err=rev_illu_err,
-                  basename=basename,
-                  read_length=READLEN
-                  )
-    return([nread * INSERLEN, INSERLEN, COV, DAMAGE])
+    result = multi_run(iterables=runlist,
+                       name=basename,
+                       mutate=MUTATE,
+                       mutrate=correct_mutrate,
+                       damage=DAMAGE,
+                       geom_p=GEOM_P,
+                       themin=THEMIN,
+                       themax=THEMAX,
+                       fwd_adaptor=A1,
+                       rev_adaptor=A2,
+                       read_length=READLEN,
+                       process=PROCESS)
+    # prepare_fastq(fastq_dict=fastq_dict,
+    #               fwd_reads=fwd_reads,
+    #               rev_reads=rev_reads,
+    #               fwd_illu_err=fwd_illu_err,
+    #               rev_illu_err=rev_illu_err,
+    #               basename=basename,
+    #               read_length=READLEN
+    #               )
+    print(result[0])
+    # return([nread * INSERLEN, INSERLEN, COV, DAMAGE])
 
 
 def specie_to_taxid(specie):
@@ -330,15 +240,15 @@ def specie_to_taxid(specie):
     return(answer)
 
 
-def write_stat(stat_dict, stat_out):
-    nbases = []
-    for akey in stat_dict:
-        nbases.append(stat_dict[akey][0])
-    totbases = sum(nbases)
-    with open(stat_out, "w") as fs:
-        fs.write(
-            "Organism,taxonomy_id,percentage of metagenome,mean_insert_length,target_coverage,deamination\n")
-        for akey in stat_dict:
-            taxid = specie_to_taxid(akey)
-            fs.write(akey + "," + str(taxid) + "," + str(round(stat_dict[akey][0] / totbases, 2)) + "," + str(
-                stat_dict[akey][1]) + "," + str(stat_dict[akey][2]) + "," + str(stat_dict[akey][3]) + "\n")
+# def write_stat(stat_dict, stat_out):
+#     nbases = []
+#     for akey in stat_dict:
+#         nbases.append(stat_dict[akey][0])
+#     totbases = sum(nbases)
+#     with open(stat_out, "w") as fs:
+#         fs.write(
+#             "Organism,taxonomy_id,percentage of metagenome,mean_insert_length,target_coverage,deamination\n")
+#         for akey in stat_dict:
+#             taxid = specie_to_taxid(akey)
+#             fs.write(akey + "," + str(taxid) + "," + str(round(stat_dict[akey][0] / totbases, 2)) + "," + str(
+#                 stat_dict[akey][1]) + "," + str(stat_dict[akey][2]) + "," + str(stat_dict[akey][3]) + "\n")

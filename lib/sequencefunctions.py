@@ -22,98 +22,202 @@ def scale(x, themin, themax):
     return(np.interp(x, (x.min(), x.max()), (themin, themax)))
 
 
-def reverse_complement(dna):
-    dna = dna.upper()
-    '''
-    Reverse complement a DNA string
-    '''
-    dna = dna[::-1]
-    revcom = []
-    complement = {"A": "T", "T": "A", "G": "C", "C": "G", "N": "N"}
-    for letter in dna:
-        for key in complement.keys():
-            if letter == key:
-                revcom.append(complement[key])
-    return "".join(revcom)
+class fragment ():
 
+    def __init__(self, sequence, num, name, fwd_phred, rev_phred):
+        """
+        sequence(str) nucleotide sequence of fragment
+        num(int) id of the sequence
+        name(str) name of the genome
+        """
+        self.seq = sequence.upper()
+        self.id = num
+        self.name = name
+        self.fwd_phred = fwd_phred
+        self.rev_phred = rev_phred
 
-def complement_read(insert, adaptor, read_length):
-    inlen = len(insert)
-    if inlen < read_length:
-        diff = read_length - inlen
-        to_add = adaptor[0:diff]
-        read = insert + to_add
-    elif inlen == read_length:
-        read = insert
-    elif inlen > read_length:
-        read = insert[0:read_length]
-    if len(read) == read_length:
-        read = read.upper()
-        read = list(read)
+    def __repr__(self):
+        return(f"A fragment class object of sequence {self.seq}")
+
+    def reverse_complement(self):
+        '''
+        Reverse complement a DNA string
+        '''
+        dna = self.seq[::-1]
+        complement = {"A": "T", "T": "A", "G": "C", "C": "G", "N": "N"}
+        revcom = [complement[i] for i in dna]
+        self.revcom = "".join(revcom)
+        return(self.revcom)
+
+    def mutate_fwd(self, mutrate, alpha=0.4, beta=0.2):
+        """
+        alpha: Transitions
+        beta: Transversions
+        https://en.wikipedia.org/wiki/Mutation_rate
+        """
+        a = int(10 * alpha)
+        b = int(10 * beta)
+        newseq = ""
+        dmut = {'A': b * ['C'] + b * ['T'] + a * ['G'], 'C': b * ['A'] + b * ['G'] + a * [
+            'T'], 'G': b * ['C'] + b * ['T'] + a * ['A'], 'T': b * ['A'] + b * ['G'] + a * ['C']}
+        for nuc in self.seq:
+            if npr.random() <= mutrate:
+                new_nucl = random.choice(dmut[nuc])
+                newseq += new_nucl
+            else:
+                newseq += nuc
+        return(self.seq)
+
+    def mutate_rev(self, mutrate, alpha=0.4, beta=0.2):
+        """
+        alpha: Transitions
+        beta: Transversions
+        https://en.wikipedia.org/wiki/Mutation_rate
+        """
+        a = int(10 * alpha)
+        b = int(10 * beta)
+        newseq = ""
+        dmut = {'A': b * ['C'] + b * ['T'] + a * ['G'], 'C': b * ['A'] + b * ['G'] + a * [
+            'T'], 'G': b * ['C'] + b * ['T'] + a * ['A'], 'T': b * ['A'] + b * ['G'] + a * ['C']}
+        for nuc in self.revcom:
+            if npr.random() <= mutrate:
+                new_nucl = random.choice(dmut[nuc])
+                newseq += new_nucl
+            else:
+                newseq += nuc
+        return(self.revcom)
+
+    def add_damage_fwd(self, geom_p, scale_min, scale_max):
+
+        insert = list(self.seq)
+        insertlen = len(self.seq)
+        x = np.arange(1, insertlen + 1)
+        geom_dist = scale(geom.pmf(x, geom_p), scale_min, scale_max)
+
+        for j in range(0, insertlen):
+            pos = j
+            opp_pos = insertlen - 1 - j
+
+            # C -> T deamination
+            if insert[pos] == "C" and geom_dist[j] >= npr.rand():
+                insert[pos] = "T"
+
+            # G -> A deamination
+            if insert[opp_pos] == "G" and geom_dist[j] >= npr.rand():
+                insert[opp_pos] = "A"
+        self.seq = "".join(insert)
+        return(self.seq)
+
+    def add_damage_rev(self, geom_p, scale_min, scale_max):
+
+        insert = list(self.revcom)
+        insertlen = len(self.revcom)
+        x = np.arange(1, insertlen + 1)
+        geom_dist = scale(geom.pmf(x, geom_p), scale_min, scale_max)
+
+        for j in range(0, insertlen):
+            pos = j
+            opp_pos = insertlen - 1 - j
+
+            # C -> T deamination
+            if insert[pos] == "C" and geom_dist[j] >= npr.rand():
+                insert[pos] = "T"
+
+            # G -> A deamination
+            if insert[opp_pos] == "G" and geom_dist[j] >= npr.rand():
+                insert[opp_pos] = "A"
+        self.revcom = "".join(insert)
+        return(self.revcom)
+
+    def complement_read_fwd(self, adaptor, read_length):
+        inlen = len(self.seq)
+        if inlen < read_length:
+            diff = read_length - inlen
+            to_add = adaptor[0:diff]
+            read = self.seq + to_add
+        elif inlen == read_length:
+            read = self.seq
+        elif inlen > read_length:
+            read = self.seq[0:read_length]
+        if len(read) == read_length:
+            read = read.upper()
+            read = list(read)
+            for j in range(0, len(read)):
+                if read[j] not in ["A", "T", "G", "C", "N"]:
+                    read[j] = "N"
+        self.fwd_read = "".join(read)
+        return(self.fwd_read)
+
+    def complement_read_rev(self, adaptor, read_length):
+        inlen = len(self.revcom)
+        if inlen < read_length:
+            diff = read_length - inlen
+            to_add = adaptor[0:diff]
+            read = self.revcom + to_add
+        elif inlen == read_length:
+            read = self.revcom
+        elif inlen > read_length:
+            read = self.revcom[0:read_length]
+        if len(read) == read_length:
+            read = read.upper()
+            read = list(read)
+            for j in range(0, len(read)):
+                if read[j] not in ["A", "T", "G", "C", "N"]:
+                    read[j] = "N"
+        self.rev_read = "".join(read)
+        return(self.rev_read)
+
+    def add_error_fwd(self):
+        read = list(self.fwd_read)
+        phred = list(self.fwd_phred)
         for j in range(0, len(read)):
-            if read[j] not in ["A", "T", "G", "C", "N"]:
-                read[j] = "N"
-    result = "".join(read)
-    return(result)
+            if npr.random() < quality.qdict[phred[j]]:
+                read[j] = npr.choice(["A", "T", "G", "C"])
+        self.fwd_err = "".join(read)
+        return(self.fwd_err)
+
+    def add_error_rev(self):
+        read = list(self.rev_read)
+        phred = list(self.rev_phred)
+        for j in range(0, len(read)):
+            if npr.random() < quality.qdict[phred[j]]:
+                read[j] = npr.choice(["A", "T", "G", "C"])
+        self.rev_err = "".join(read)
+        return(self.rev_err)
+
+    def combine_fwd(self):
+        self.fwd_fq = f"@{self.name}_{self.id}/1\n{self.fwd_err}\n+\n{self.fwd_phred}"
+        return(self.fwd_fq)
+
+    def combine_rev(self):
+        self.rev_fq = f"@{self.name}_{self.id}/2\n{self.rev_err}\n+\n{self.rev_phred}"
+        return(self.rev_fq)
 
 
-def add_damage(insert, geom_p, scale_min, scale_max):
-    insert = list(insert)
-    insertlen = len(insert)
-    x = np.arange(1, insertlen + 1)
-    geom_dist = scale(geom.pmf(x, geom_p), scale_min, scale_max)
-
-    for j in range(0, insertlen):
-        pos = j
-        opp_pos = insertlen - 1 - j
-
-        # C -> T deamination
-        if insert[pos] == "C" and geom_dist[j] >= npr.rand():
-            insert[pos] = "T"
-
-        # G -> A deamination
-        if insert[opp_pos] == "G" and geom_dist[j] >= npr.rand():
-            insert[opp_pos] = "A"
-    result = "".join(insert)
-    return(result)
+def prepare_run(all_frag, all_fwd_err, all_rev_err):
+    res = [[i, j, k, l]
+           for i, j, k, l in zip(all_frag, all_fwd_err, all_rev_err, range(0, len(all_frag)))]
+    return(res)
 
 
-def add_error(read, error_rate):
-    read = list(read)
-    for j in range(0, len(read)):
-        if read[j].upper() not in ["A", "T", "G", "C", "N"]:
-            read[j] = "N"
-        if npr.random() < error_rate:
-            read[j] = npr.choice(["A", "T", "G", "C"])
-    return("".join(read))
-
-
-def add_error_phred(read, phred):
-    read = list(read)
-    phred = list(phred)
-    for j in range(0, len(read)):
-        if read[j].upper() not in ["A", "T", "G", "C", "N"]:
-            read[j] = "N"
-        elif npr.random() < quality.qdict[phred[j]]:
-            read[j] = npr.choice(["A", "T", "G", "C"])
-    return("".join(read))
-
-
-def mutate(sequence, mutrate, alpha=0.4, beta=0.2):
-    """
-    alpha: Transitions
-    beta: Transversions
-    https://en.wikipedia.org/wiki/Mutation_rate
-    """
-    a = int(10 * alpha)
-    b = int(10 * beta)
-    newseq = ""
-    dmut = {'A': b * ['C'] + b * ['T'] + a * ['G'], 'C': b * ['A'] + b * ['G'] + a * [
-        'T'], 'G': b * ['C'] + b * ['T'] + a * ['A'], 'T': b * ['A'] + b * ['G'] + a * ['C']}
-    for nuc in sequence:
-        if npr.random() <= mutrate:
-            new_nucl = random.choice(dmut[nuc])
-            newseq += new_nucl
-        else:
-            newseq += nuc
-    return(newseq)
+def generate_fq(iterables, name,  mutate, mutrate, damage, geom_p, themin, themax, fwd_adaptor, rev_adaptor, read_length):
+    frag = iterables[0]
+    phred_fwd = iterables[1]
+    phred_rev = iterables[2]
+    num = iterables[3]
+    frg = fragment(sequence=frag, num=num, name=name,
+                   fwd_phred=phred_fwd, rev_phred=phred_rev)
+    frg.reverse_complement()
+    if mutate:
+        frg.mutate_fwd(mutrate=mutrate)
+        frg.mutate_rev(mutrate=mutrate)
+    if damage:
+        frg.add_damage_fwd(geom_p=geom_p, scale_min=themin, scale_max=themax)
+        frg.add_damage_rev(geom_p=geom_p, scale_min=themin, scale_max=themax)
+    frg.complement_read_fwd(adaptor=fwd_adaptor, read_length=read_length)
+    frg.complement_read_rev(adaptor=rev_adaptor, read_length=read_length)
+    frg.add_error_fwd()
+    frg.add_error_rev()
+    frg.combine_fwd()
+    frg.combine_rev()
+    return([frg.fwd_fq, frg.rev_fq])
