@@ -38,7 +38,7 @@ You can cite ADRSM like this:
 # Help
 
     $ adrsm --help
-    usage: ADRSM v0.9.2 [-h] [-r READLENGTH] [-n NBINOM] [-fwd FWDADAPT]
+    usage: ADRSM v0.9.3 [-h] [-r READLENGTH] [-n NBINOM] [-fwd FWDADAPT]
                     [-rev REVADAPT] [-p GEOM_P] [-m MIN] [-M MAX] [-o OUTPUT]
                     [-s STATS] [-se SEED] [-t THREADS]
                     confFile

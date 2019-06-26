@@ -82,9 +82,9 @@ Homepage & Documentation: github.com/maxibor/adrsm
     nbinom = int(args.nbinom)
     a1 = args.fwdAdapt
     a2 = args.revAdapt
-    geom_p = args.geom_p
-    themin = args.min
-    themax = args.max
+    geom_p = float(args.geom_p)
+    themin = float(args.min)
+    themax = float(args.max)
     outfile = args.output
     stats = args.stats
     seed = int(args.seed)
@@ -123,12 +123,12 @@ def read_config(infile):
 
 
 if __name__ == "__main__":
-    version = "0.9.2"
+    version = "0.9.3"
     INFILE, READLEN, NBINOM, A1, A2, GEOM_P, THEMIN, THEMAX, OUTFILE, STATS, SEED, PROCESS = _get_args()
 
     MINLENGTH = 20
     npr.seed(SEED)
-    genome_dict = {}
+    fastq_list = []
     stat_dict = {}
     all_genomes = read_config(INFILE)
     for agenome in all_genomes.keys():
@@ -147,12 +147,11 @@ if __name__ == "__main__":
                                                     GEOM_P=GEOM_P,
                                                     THEMIN=THEMIN,
                                                     THEMAX=THEMAX,
-                                                    fastq_dict=genome_dict,
-                                                    PROCESS=PROCESS)
+                                                    PROCESS=PROCESS,
+                                                    FASTQ_OUT=OUTFILE)
         stat_dict[ad.get_basename(agenome)] = stat_and_run
 
-    # ad.write_fastq_multi(fastq_dict=genome_dict, outputfile=OUTFILE)
-    # ad.write_stat(stat_dict=stat_dict, stat_out=STATS)
+    ad.write_stat(stat_dict=stat_dict, stat_out=STATS)
     print("\n-- ADRSM v" + str(version) +
           " finished generating this mock metagenome --")
     print("-- FASTQ files written to " + OUTFILE +

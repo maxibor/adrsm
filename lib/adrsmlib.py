@@ -52,14 +52,12 @@ def read_fasta(file_name):
     return([result, len(result)])
 
 
-def write_fastq_multi(fastq_dict, outputfile):
-    with open(outputfile + ".1.fastq", "w") as f1:
-        with open(outputfile + ".2.fastq", "w") as f2:
-            for akey in fastq_dict.keys():
-                for reads1 in fastq_dict[akey][0]:
-                    f1.write(reads1)
-                for reads2 in fastq_dict[akey][1]:
-                    f2.write(reads2)
+def write_fastq_multi(fastq_list, outputfile):
+    with open(outputfile + ".1.fastq", "a") as f1:
+        with open(outputfile + ".2.fastq", "a") as f2:
+            for read in fastq_list:
+                f1.write(read[0])
+                f2.write(read[1])
 
 
 def markov_wrapper_fwd(times):
@@ -135,7 +133,7 @@ def multi_run(iterables, name,  mutate, mutrate, damage, geom_p, themin, themax,
     return(r)
 
 
-def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MINLENGTH, MUTATE, MUTRATE, AGE, DAMAGE, GEOM_P, THEMIN, THEMAX, fastq_dict, PROCESS):
+def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MINLENGTH, MUTATE, MUTRATE, AGE, DAMAGE, GEOM_P, THEMIN, THEMAX, PROCESS, FASTQ_OUT):
     print("===================\n===================")
     print("Genome: ", INFILE)
     print("Coverage: ", COV)
@@ -211,16 +209,8 @@ def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MI
                        rev_adaptor=A2,
                        read_length=READLEN,
                        process=PROCESS)
-    # prepare_fastq(fastq_dict=fastq_dict,
-    #               fwd_reads=fwd_reads,
-    #               rev_reads=rev_reads,
-    #               fwd_illu_err=fwd_illu_err,
-    #               rev_illu_err=rev_illu_err,
-    #               basename=basename,
-    #               read_length=READLEN
-    #               )
-    print(result[0])
-    # return([nread * INSERLEN, INSERLEN, COV, DAMAGE])
+    write_fastq_multi(fastq_list=result, outputfile=FASTQ_OUT)
+    return([nread * INSERLEN, INSERLEN, COV, DAMAGE])
 
 
 def specie_to_taxid(specie):
@@ -240,15 +230,15 @@ def specie_to_taxid(specie):
     return(answer)
 
 
-# def write_stat(stat_dict, stat_out):
-#     nbases = []
-#     for akey in stat_dict:
-#         nbases.append(stat_dict[akey][0])
-#     totbases = sum(nbases)
-#     with open(stat_out, "w") as fs:
-#         fs.write(
-#             "Organism,taxonomy_id,percentage of metagenome,mean_insert_length,target_coverage,deamination\n")
-#         for akey in stat_dict:
-#             taxid = specie_to_taxid(akey)
-#             fs.write(akey + "," + str(taxid) + "," + str(round(stat_dict[akey][0] / totbases, 2)) + "," + str(
-#                 stat_dict[akey][1]) + "," + str(stat_dict[akey][2]) + "," + str(stat_dict[akey][3]) + "\n")
+def write_stat(stat_dict, stat_out):
+    nbases = []
+    for akey in stat_dict:
+        nbases.append(stat_dict[akey][0])
+    totbases = sum(nbases)
+    with open(stat_out, "w") as fs:
+        fs.write(
+            "Organism,taxonomy_id,percentage of metagenome,mean_insert_length,target_coverage,deamination\n")
+        for akey in stat_dict:
+            taxid = specie_to_taxid(akey)
+            fs.write(akey + "," + str(taxid) + "," + str(round(stat_dict[akey][0] / totbases, 2)) + "," + str(
+                stat_dict[akey][1]) + "," + str(stat_dict[akey][2]) + "," + str(stat_dict[akey][3]) + "\n")
