@@ -186,11 +186,11 @@ class fragment ():
         return(self.rev_err)
 
     def combine_fwd(self):
-        self.fwd_fq = f"@{self.name}_{self.id}/1\n{self.fwd_err}\n+\n{self.fwd_phred}"
+        self.fwd_fq = f"@{self.name}_{self.id}/1\n{self.fwd_err}\n+\n{self.fwd_phred}\n"
         return(self.fwd_fq)
 
     def combine_rev(self):
-        self.rev_fq = f"@{self.name}_{self.id}/2\n{self.rev_err}\n+\n{self.rev_phred}"
+        self.rev_fq = f"@{self.name}_{self.id}/2\n{self.rev_err}\n+\n{self.rev_phred}\n"
         return(self.rev_fq)
 
 
