@@ -1,0 +1,2 @@
+genome(mandatory), insert_size(mandatory), coverage(mandatory), deamination(mandatory), mutation_rate(optional), age(optional)
+./data/genomes/Bacillus_anthracis.fa, 60, 0.2, yes
