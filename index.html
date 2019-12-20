@@ -31,7 +31,7 @@
     </p>
     <form id="form">
         <label for="eq">Parameter for geometric distribution:</label>
-        <input type="number" id="param" step="0.01" min="0.1" max="1" value="0.5" />
+        <input type="number" id="param" step="0.01" min="0.01" max="1" value="0.5" />
         <label for="eq">Sequence size:</label>
         <input type="number" id="seqsize" min="20" max="100" value="30" />
         <label for="eq">Max probability:</label>
@@ -78,7 +78,8 @@
                         title: 'nucleotide position'
                     },
                     yaxis: {
-                        title: 'probability'
+                        title: 'probability',
+                        range: [0, 1]
                     }
                 };
                 const data = [trace1]
