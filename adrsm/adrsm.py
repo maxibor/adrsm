@@ -88,7 +88,6 @@ def cli(no_args_is_help=True, **kwargs):
 
     CONFFILE: path to ADRSM configuration file
     """
-    print(kwargs)
     main(**kwargs)
 
 def read_config(infile):
