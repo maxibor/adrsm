@@ -8,6 +8,7 @@ from numpy import random as npr
 import multiprocessing
 import pickle
 from functools import partial
+from pkg_resources import resource_filename
 from . import sequencefunctions as sf
 from . import markov as mk
 
@@ -95,10 +96,7 @@ def get_fwd_qual():
         ret = pickle.load(open("data/quality/fwd_qual.p", 'rb'))
         return(ret)
     except FileNotFoundError:
-        cmd = "which adrsm"
-        res = subprocess.check_output(cmd, shell=True)
-        res = res.decode('utf-8').rstrip()
-        path = "/".join(res.split("/")[:-2])+"/data/quality/fwd_qual.p"
+        path = resource_filename('adrsm', '/data/quality/fwd_qual.p')
         ret = pickle.load(open(path, 'rb'))
         return(ret)
 
@@ -108,10 +106,7 @@ def get_rev_qual():
         ret = pickle.load(open("data/quality/fwd_qual.p", 'rb'))
         return(ret)
     except FileNotFoundError:
-        cmd = "which adrsm"
-        res = subprocess.check_output(cmd, shell=True)
-        res = res.decode('utf-8').rstrip()
-        path = "/".join(res.split("/")[:-2])+"/data/quality/rev_qual.p"
+        path = resource_filename('adrsm', '/data/quality/rev_qual.p')
         ret = pickle.load(open(path, 'rb'))
         return(ret)
 

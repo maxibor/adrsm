@@ -1,10 +1,10 @@
 all: multiqc_report.html
 
-bt_b_anthracis*: data/genomes/Bacillus_anthracis.fa
-	bowtie2-build data/genomes/Bacillus_anthracis.fa bt_b_anthracis
+bt_b_anthracis*: ../data/genomes/Bacillus_anthracis.fa
+	bowtie2-build ../data/genomes/Bacillus_anthracis.fa bt_b_anthracis
 
-metagenome.1.fastq metagenome.2.fastq: data/b_anthracis.csv
-	python adrsm -p 0.8 -M 0.04 -m 0.01  ./data/short_genome_list.csv
+metagenome.1.fastq metagenome.2.fastq: ../data/b_anthracis.csv
+	python ../adrsm -p 0.8 -M 0.04 -m 0.01  ../data/short_genome_list.csv
 
 metagenome_collapse.fq *_fastqc.html metagenome.settings: metagenome.1.fastq metagenome.2.fastq
 	fastqc metagenome.*.fastq
