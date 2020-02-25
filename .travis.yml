@@ -6,5 +6,8 @@ install:
     - pip install numpy
     - pip install scipy
     - pip install requests
+    - pip install click
 # command to run tests
-script: python adrsm -p 0.5 -m 0.001 -M 0.3 -t 2 ./data/short_genome_list.csv
+script: 
+  - python setup.py install
+  - adrsm -p 0.5 -m 0.001 -M 0.3 -t 2 ./test/data/short_genome_list.csv

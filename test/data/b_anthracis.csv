@@ -1,3 +1,2 @@
 genome(mandatory), insert_size(mandatory), coverage(mandatory), deamination(mandatory), mutation_rate(optional), age(optional)
-./data/genomes/Agrobacterium_tumefaciens.fa, 47 , 0.1, yes, 10e-7, 10000
-./data/genomes/Bacillus_anthracis.fa, 48, 0.2, no
+./data/genomes/Bacillus_anthracis.fa, 60, 0.2, yes

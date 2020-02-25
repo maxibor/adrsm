@@ -5,3 +5,7 @@ r1.fq
 r2.fq
 metagenome.*
 stats.csv
+adrsm.egg-info
+__pycache__
+.ipynb_checkpoints
+dist

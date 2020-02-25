@@ -58,8 +58,10 @@ class fragment ():
         a = int(10 * alpha)
         b = int(10 * beta)
         newseq = ""
-        dmut = {'A': b * ['C'] + b * ['T'] + a * ['G'], 'C': b * ['A'] + b * ['G'] + a * [
-            'T'], 'G': b * ['C'] + b * ['T'] + a * ['A'], 'T': b * ['A'] + b * ['G'] + a * ['C']}
+        dmut = {'A': b * ['C'] + b * ['T'] + a * ['G'], 
+                'C': b * ['A'] + b * ['G'] + a * ['T'], 
+                'G': b * ['C'] + b * ['T'] + a * ['A'], 
+                'T': b * ['A'] + b * ['G'] + a * ['C']}
         for nuc in self.seq:
             if npr.random() <= mutrate:
                 new_nucl = random.choice(dmut[nuc])
@@ -77,8 +79,10 @@ class fragment ():
         a = int(10 * alpha)
         b = int(10 * beta)
         newseq = ""
-        dmut = {'A': b * ['C'] + b * ['T'] + a * ['G'], 'C': b * ['A'] + b * ['G'] + a * [
-            'T'], 'G': b * ['C'] + b * ['T'] + a * ['A'], 'T': b * ['A'] + b * ['G'] + a * ['C']}
+        dmut = {'A': b * ['C'] + b * ['T'] + a * ['G'], 
+                'C': b * ['A'] + b * ['G'] + a * ['T'], 
+                'G': b * ['C'] + b * ['T'] + a * ['A'], 
+                'T': b * ['A'] + b * ['G'] + a * ['C']}
         for nuc in self.revcom:
             if npr.random() <= mutrate:
                 new_nucl = random.choice(dmut[nuc])
@@ -92,19 +96,36 @@ class fragment ():
         insert = list(self.seq)
         insertlen = len(self.seq)
         x = np.arange(1, insertlen + 1)
-        geom_dist = scale(geom.pmf(x, geom_p), scale_min, scale_max)
+        geom_dist = geom.pmf(x, geom_p)
+        # geom_dist = scale(geom.pmf(x, geom_p), scale_min, scale_max)
 
         for j in range(0, insertlen):
             pos = j
             opp_pos = insertlen - 1 - j
+            rnd = npr.rand()
 
-            # C -> T deamination
-            if insert[pos] == "C" and geom_dist[j] >= npr.rand():
-                insert[pos] = "T"
+            # C -> T deamination - deamination
+            if rnd <= scale_max:
+                if insert[pos] == "C" and geom_dist[j] >= rnd:
+                    insert[pos] = "T"
+
+            # C -> T deamination - baseline
+            if rnd <= scale_min:
+                if insert[pos] == "C":
+                    insert[pos] = "T"
+
+            rnd = npr.rand()
 
             # G -> A deamination
-            if insert[opp_pos] == "G" and geom_dist[j] >= npr.rand():
-                insert[opp_pos] = "A"
+            if rnd <= scale_max:
+                if insert[opp_pos] == "G" and geom_dist[j] >= rnd:
+                    insert[opp_pos] = "A"
+
+            # G -> A deamination - baseline
+            if rnd <= scale_min:
+                if insert[pos] == "G":
+                    insert[pos] = "A"
+
         self.seq = "".join(insert)
         return(self.seq)
 
@@ -113,19 +134,33 @@ class fragment ():
         insert = list(self.revcom)
         insertlen = len(self.revcom)
         x = np.arange(1, insertlen + 1)
-        geom_dist = scale(geom.pmf(x, geom_p), scale_min, scale_max)
+        geom_dist = geom.pmf(x, geom_p)
+        # geom_dist = scale(geom.pmf(x, geom_p), scale_min, scale_max)
 
         for j in range(0, insertlen):
             pos = j
             opp_pos = insertlen - 1 - j
 
-            # C -> T deamination
-            if insert[pos] == "C" and geom_dist[j] >= npr.rand():
-                insert[pos] = "T"
+           # C -> T deamination - deamination
+            if npr.rand() <= scale_max:
+                if insert[pos] == "C" and geom_dist[j] >= npr.rand():
+                    insert[pos] = "T"
+
+            # C -> T deamination - baseline
+            if npr.rand() <= scale_min:
+                if insert[pos] == "C":
+                    insert[pos] = "T"
 
             # G -> A deamination
-            if insert[opp_pos] == "G" and geom_dist[j] >= npr.rand():
-                insert[opp_pos] = "A"
+            if npr.rand() <= scale_max:
+                if insert[opp_pos] == "G" and geom_dist[j] >= npr.rand():
+                    insert[opp_pos] = "A"
+
+            # C -> T deamination - baseline
+            if npr.rand() <= scale_min:
+                if insert[pos] == "G":
+                    insert[pos] = "A"
+                    
         self.revcom = "".join(insert)
         return(self.revcom)
 
