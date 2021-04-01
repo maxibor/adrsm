@@ -87,7 +87,7 @@ The configuration `.csv` file describes, one line per genome, the different simu
 - the age (integer) - **optional** 
 
 
-**Example:** [**short_genome_list.csv**](./data/short_genome_list.csv)
+**Example:** [**short_genome_list.csv**](https://raw.githubusercontent.com/maxibor/adrsm/master/test/data/short_genome_list.csv)
 
 | genome(mandatory)            | insert_size(mandatory) | coverage(mandatory) | deamination(mandatory) | mutation_rate(optional) | age(optional) |
 | ---------------------------- | ---------------------- | ------------------- | ---------------------- | ----------------------- | ------------- |
