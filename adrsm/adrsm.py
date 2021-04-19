@@ -136,8 +136,6 @@ def read_config(infile):
             genomes[row_name] = row
 
     for genome in genomes:
-        print(genome)
-        print(genomes[genome])
         genomes[genome] = {k.replace(" ", ""): v for k, v in genomes[genome].items()}
         genomes[genome]["size"] = int(genomes[genome].pop("insert_size(mandatory)"))
         genomes[genome]["cov"] = float(genomes[genome].pop("coverage(mandatory)"))
@@ -178,6 +176,7 @@ def main(
     stat_dict = {}
     all_genomes = read_config(conffile)
     all_reads = []
+    print("-- ADRSM v" + __version__ + " --")
     for agenome in all_genomes.keys():
         reads, stat_and_run = ad.run_read_simulation_multi(
             INFILE=agenome,

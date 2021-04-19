@@ -1,9 +1,5 @@
 [![ADRSM version](https://img.shields.io/badge/adrsm-v0.9.2-blue.svg)](https://github.com/maxibor/adrsm) [![Build Status](https://travis-ci.org/maxibor/adrsm.svg?branch=master)](https://travis-ci.org/maxibor/adrsm) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1462743.svg)](https://doi.org/10.5281/zenodo.1462743) [![Anaconda-Server Badge](https://anaconda.org/maxibor/adrsm/badges/installer/conda.svg)](https://anaconda.org/maxibor/adrsm)  
 
-
-
-
-
 * * *
 
 <img src="./img/logo_adrsm.png" width="300">
@@ -38,43 +34,53 @@ You can cite ADRSM like this:
 # Help
 
     $ adrsm --help
-    usage: ADRSM v0.9.3 [-h] [-r READLENGTH] [-n NBINOM] [-fwd FWDADAPT]
-                    [-rev REVADAPT] [-p GEOM_P] [-m MIN] [-M MAX] [-o OUTPUT]
-                    [-s STATS] [-se SEED] [-t THREADS]
-                    confFile
+    Usage: adrsm [OPTIONS] CONFFILE
 
-    ==================================================
+      ==================================================
+      ADRSM: Ancient DNA Read Simulator for Metagenomics
+      Author: Maxime Borry
+      Contact: <borry[at]shh.mpg.de>
+      Homepage & Documentation: github.com/maxibor/adrsm
 
-    ADRSM: Ancient DNA Read Simulator for Metagenomics
+      CONFFILE: path to ADRSM configuration file
 
-    Author: Maxime Borry
+    Options:
+      --version                    Show the version and exit.
+      -r, --readLength INTEGER     Average read length  [default: 76]
+      -n, --nbinom INTEGER         n parameter for Negative Binomial insert length
+                                   distribution  [default: 8]
 
-    Contact: <borry[at]shh.mpg.de>
+      -fwd, --fwdAdapt TEXT        Forward adaptor sequence  [default: AGATCGGAAGA
+                                   GCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTC
+                                   TGCTTG]
 
-    Homepage & Documentation: github.com/maxibor/adrsm
-    ==================================================
+      -rev, --revAdapt TEXT        Reverse adaptor sequence  [default: AGATCGGAAGA
+                                   GCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT
+                                   ]
 
+      -p, --geom_p FLOAT RANGE     Geometric distribution parameter for
+                                   deamination  [default: 0.5]
 
-    positional arguments:
-    confFile       path to configuration file
+      -m, --minD FLOAT RANGE       Deamination substitution base frequency
+                                   [default: 0.01]
 
-    optional arguments:
-    -h, --help     show this help message and exit
-    -r READLENGTH  Average read length. Default = 76
-    -n NBINOM      n parameter for Negative Binomial insert length distribution.
-                    Default = 8
-    -fwd FWDADAPT  Forward adaptor. Default = AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC
-                    NNNNNNATCTCGTATGCCGTCTTCTGCTTG
-    -rev REVADAPT  Reverse adaptor. Default =
-                    AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT
-    -p GEOM_P      Geometric distribution parameter for deamination. Default =
-                    0.5
-    -m MIN         Deamination substitution base frequency. Default = 0.001
-    -M MAX         Deamination substitution max frequency. Default = 0.3
-    -o OUTPUT      Output file basename. Default = ./metagenome.*
-    -s STATS       Statistic file. Default = stats.csv
-    -se SEED       Seed for random generator. Default = 7357
-    -t THREADS     Number of threads for parallel processing. Default = 2
+      -M, --maxD FLOAT RANGE       Deamination substitution max frequency
+                                   [default: 0.3]
+
+      -e, --effort INTEGER         Sequencing effort, maximum number of reads to
+                                   be generated  [default: 100]
+
+      -s, --seed INTEGER           Seed for random generator generator  [default:
+                                   42]
+
+      -t, --threads INTEGER RANGE  Number of threads for parallel processing
+                                   [default: 2]
+
+      -o, --output PATH            Fastq output file basename  [default:
+                                   ./metagenome]
+
+      -s, --stats PATH             Summary statistics file  [default: ./stats.csv]
+      --help                       Show this message and exit.
 
 ## Configuration file (`confFile`)
 
@@ -89,8 +95,8 @@ The configuration `.csv` file describes, one line per genome, the different simu
 
 **Example:** [**short_genome_list.csv**](test/data/short_genome_list.csv)
 
-| genome(mandatory)            | insert_size(mandatory) | coverage(mandatory) | deamination(mandatory) | mutation_rate(optional) | age(optional) |
-| ---------------------------- | ---------------------- | ------------------- | ---------------------- | ----------------------- | ------------- |
+| genome(mandatory)                           | insert_size(mandatory) | coverage(mandatory) | deamination(mandatory) | mutation_rate(optional) | age(optional) |
+| ------------------------------------------- | ---------------------- | ------------------- | ---------------------- | ----------------------- | ------------- |
 | ./data/genomes/Agrobacterium_tumefaciens.fa | 47                     | 0.1                 | yes                    | 10e-8                   | 10000         |
 | ./data/genomes/Bacillus_anthracis.fa        | 48                     | 0.2                 | no                     |                         |               |
 
