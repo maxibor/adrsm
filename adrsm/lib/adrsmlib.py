@@ -188,7 +188,6 @@ def run_read_simulation_multi(
     THEMIN,
     THEMAX,
     PROCESS,
-    FASTQ_OUT,
 ):
     print("===================\n===================")
     print("Genome: ", INFILE)
@@ -269,8 +268,9 @@ def run_read_simulation_multi(
         read_length=READLEN,
         process=PROCESS,
     )
-    write_fastq_multi(fastq_list=result, outputfile=FASTQ_OUT)
-    return [nread * INSERLEN, INSERLEN, COV, DAMAGE]
+
+    # write_fastq_multi(fastq_list=result, outputfile=FASTQ_OUT)
+    return result, [nread * INSERLEN, INSERLEN, COV, DAMAGE]
 
 
 def specie_to_taxid(specie):

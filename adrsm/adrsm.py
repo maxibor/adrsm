@@ -5,6 +5,7 @@ from adrsm.lib import adrsmlib as ad
 from adrsm import __version__
 import click
 import csv
+import random
 
 
 @click.command()
@@ -67,6 +68,14 @@ import csv
     type=click.FloatRange(min=0.0, max=1.0),
     show_default=True,
     help="Deamination substitution max frequency",
+)
+@click.option(
+    "-e",
+    "--effort",
+    default=100,
+    type=int,
+    show_default=True,
+    help="Sequencing effort, maximum number of reads to be generated",
 )
 @click.option(
     "-s",
@@ -157,6 +166,7 @@ def main(
     geom_p,
     mind,
     maxd,
+    effort,
     seed,
     threads,
     output,
@@ -167,8 +177,9 @@ def main(
     fastq_list = []
     stat_dict = {}
     all_genomes = read_config(conffile)
+    all_reads = []
     for agenome in all_genomes.keys():
-        stat_and_run = ad.run_read_simulation_multi(
+        reads, stat_and_run = ad.run_read_simulation_multi(
             INFILE=agenome,
             COV=all_genomes[agenome]["cov"],
             READLEN=readlength,
@@ -185,14 +196,27 @@ def main(
             THEMIN=mind,
             THEMAX=maxd,
             PROCESS=threads,
-            FASTQ_OUT=output,
         )
         stat_dict[ad.get_basename(agenome)] = stat_and_run
+        all_reads.extend(reads)
 
+    if len(all_reads) > effort:
+        all_reads = random.sample(all_reads, effort)
+    ad.write_fastq_multi(all_reads, output)
     ad.write_stat(stat_dict=stat_dict, stat_out=stats)
-    print("\n-- ADRSM v" + __version__ + " finished generating this mock metagenome --")
     print(
-        "-- FASTQ files written to " + output + ".1.fastq and " + output + ".2.fastq --"
+        "\n-- ADRSM v"
+        + __version__
+        + " finished generating "
+        + str(len(all_reads))
+        + " reads for this mock metagenome --"
+    )
+    print(
+        "-- FASTQ files written to "
+        + output
+        + ".1.fastq.gz and "
+        + output
+        + ".2.fastq.gz --"
     )
     print("-- Statistic file written to " + stats + " --")
 
