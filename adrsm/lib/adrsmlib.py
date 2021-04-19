@@ -11,13 +11,14 @@ from functools import partial
 from pkg_resources import resource_filename
 from . import sequencefunctions as sf
 from . import markov as mk
+from xopen import xopen
 
 
 def parse_yes_no(astring):
     if "yes" in astring:
-        return(True)
+        return True
     elif "no" in astring:
-        return(False)
+        return False
     else:
         sys.exit("Please specify deamination (yes | no)")
 
@@ -27,7 +28,7 @@ def get_basename(file_name):
         basename = file_name.split("/")[-1].split(".")[0]
     else:
         basename = file_name.split(".")[0]
-    return(basename)
+    return basename
 
 
 def read_fasta(file_name):
@@ -40,95 +41,155 @@ def read_fasta(file_name):
     """
     result = ""
     # fastadict = {}
-    with open(file_name, "r") as f:
-        for line in f:
-            if line[0] == ">":
-                # seqname = line[1:]
-                # fastadict[seqname] = []
-                continue
-            else:
-                line = line.rstrip()
-                # fastadict[seqname].append(line)
-                result += line
-    return([result, len(result)])
+    if file_name.endswith(".gz"):
+        with xopen(file_name, "r") as f:
+            for line in f:
+                if line[0] == ">":
+                    # seqname = line[1:]
+                    # fastadict[seqname] = []
+                    continue
+                else:
+                    line = line.rstrip()
+                    # fastadict[seqname].append(line)
+                    result += line
+    else:
+        with open(file_name, "r") as f:
+            for line in f:
+                if line[0] == ">":
+                    # seqname = line[1:]
+                    # fastadict[seqname] = []
+                    continue
+                else:
+                    line = line.rstrip()
+                    # fastadict[seqname].append(line)
+                    result += line
+    return [result, len(result)]
 
 
-def write_fastq_multi(fastq_list, outputfile):
-    with open(outputfile + ".1.fastq", "a") as f1:
-        with open(outputfile + ".2.fastq", "a") as f2:
-            for read in fastq_list:
-                f1.write(read[0])
-                f2.write(read[1])
+def write_fastq_multi(fastq_list, outputfile, compressed=True):
+    if compressed:
+        with xopen(outputfile + ".1.fastq.gz", "ab") as f1:
+            with xopen(outputfile + ".2.fastq.gz", "ab") as f2:
+                for read in fastq_list:
+                    f1.write(read[0].encode())
+                    f2.write(read[1].encode())
+    else:
+        with open(outputfile + ".1.fastq", "a") as f1:
+            with open(outputfile + ".2.fastq", "a") as f2:
+                for read in fastq_list:
+                    f1.write(read[0])
+                    f2.write(read[1])
 
 
 def markov_wrapper_fwd(times):
     a = 0
-    while(a == 0):
-        a = mk.mchain(starts=MARKOV_START_FWD, kmers=MARKOV_DICT_FWD,
-                      readsize=READSIZE, order=MARKOV_ORDER)
-    return(a)
+    while a == 0:
+        a = mk.mchain(
+            starts=MARKOV_START_FWD,
+            kmers=MARKOV_DICT_FWD,
+            readsize=READSIZE,
+            order=MARKOV_ORDER,
+        )
+    return a
 
 
 def markov_wrapper_rev(times):
     a = 0
-    while(a == 0):
-        a = mk.mchain(starts=MARKOV_START_REV, kmers=MARKOV_DICT_REV,
-                      readsize=READSIZE, order=MARKOV_ORDER)
-    return(a)
+    while a == 0:
+        a = mk.mchain(
+            starts=MARKOV_START_REV,
+            kmers=MARKOV_DICT_REV,
+            readsize=READSIZE,
+            order=MARKOV_ORDER,
+        )
+    return a
 
 
 def markov_multi_fwd(process, nreads):
     myIter = range(nreads)
     with multiprocessing.Pool(process) as p:
         r = p.map(markov_wrapper_fwd, myIter)
-    return(r)
+    return r
 
 
 def markov_multi_rev(process, nreads):
     myIter = range(nreads)
     with multiprocessing.Pool(process) as p:
         r = p.map(markov_wrapper_rev, myIter)
-    return(r)
+    return r
 
 
 def get_fwd_qual():
     try:
-        ret = pickle.load(open("data/quality/fwd_qual.p", 'rb'))
-        return(ret)
+        ret = pickle.load(open("data/quality/fwd_qual.p", "rb"))
+        return ret
     except FileNotFoundError:
-        path = resource_filename('adrsm', '/data/quality/fwd_qual.p')
-        ret = pickle.load(open(path, 'rb'))
-        return(ret)
+        path = resource_filename("adrsm", "/data/quality/fwd_qual.p")
+        ret = pickle.load(open(path, "rb"))
+        return ret
 
 
 def get_rev_qual():
     try:
-        ret = pickle.load(open("data/quality/fwd_qual.p", 'rb'))
-        return(ret)
+        ret = pickle.load(open("data/quality/fwd_qual.p", "rb"))
+        return ret
     except FileNotFoundError:
-        path = resource_filename('adrsm', '/data/quality/rev_qual.p')
-        ret = pickle.load(open(path, 'rb'))
-        return(ret)
+        path = resource_filename("adrsm", "/data/quality/rev_qual.p")
+        ret = pickle.load(open(path, "rb"))
+        return ret
 
 
-def multi_run(iterables, name,  mutate, mutrate, damage, geom_p, themin, themax, fwd_adaptor, rev_adaptor, read_length, process):
-    partial_run = partial(sf.generate_fq,
-                          name=name,
-                          mutate=mutate,
-                          mutrate=mutrate,
-                          damage=damage,
-                          geom_p=geom_p,
-                          themin=themin,
-                          themax=themax,
-                          fwd_adaptor=fwd_adaptor,
-                          rev_adaptor=rev_adaptor,
-                          read_length=read_length)
+def multi_run(
+    iterables,
+    name,
+    mutate,
+    mutrate,
+    damage,
+    geom_p,
+    themin,
+    themax,
+    fwd_adaptor,
+    rev_adaptor,
+    read_length,
+    process,
+):
+    partial_run = partial(
+        sf.generate_fq,
+        name=name,
+        mutate=mutate,
+        mutrate=mutrate,
+        damage=damage,
+        geom_p=geom_p,
+        themin=themin,
+        themax=themax,
+        fwd_adaptor=fwd_adaptor,
+        rev_adaptor=rev_adaptor,
+        read_length=read_length,
+    )
     with multiprocessing.Pool(process) as p:
         r = p.map(partial_run, iterables)
-    return(r)
+    return r
 
 
-def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MINLENGTH, MUTATE, MUTRATE, AGE, DAMAGE, GEOM_P, THEMIN, THEMAX, PROCESS, FASTQ_OUT):
+def run_read_simulation_multi(
+    INFILE,
+    COV,
+    READLEN,
+    INSERLEN,
+    NBINOM,
+    A1,
+    A2,
+    MINLENGTH,
+    MUTATE,
+    MUTRATE,
+    AGE,
+    DAMAGE,
+    GEOM_P,
+    THEMIN,
+    THEMAX,
+    PROCESS,
+    FASTQ_OUT,
+):
     print("===================\n===================")
     print("Genome: ", INFILE)
     print("Coverage: ", COV)
@@ -165,9 +226,11 @@ def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MI
     QUALIT_FWD = get_fwd_qual()
     QUALIT_REV = get_rev_qual()
     MARKOV_SEED_FWD = mk.generate_kmer(
-        qualities=QUALIT_FWD, order=MARKOV_ORDER, readsize=READLEN)
+        qualities=QUALIT_FWD, order=MARKOV_ORDER, readsize=READLEN
+    )
     MARKOV_SEED_REV = mk.generate_kmer(
-        qualities=QUALIT_REV, order=MARKOV_ORDER, readsize=READLEN)
+        qualities=QUALIT_REV, order=MARKOV_ORDER, readsize=READLEN
+    )
     MARKOV_START_FWD = MARKOV_SEED_FWD[0]
     MARKOV_START_REV = MARKOV_SEED_REV[0]
     MARKOV_DICT_FWD = MARKOV_SEED_FWD[1]
@@ -184,28 +247,30 @@ def run_read_simulation_multi(INFILE, COV, READLEN, INSERLEN, NBINOM, A1, A2, MI
         correct_mutrate = 0
 
     # Prepare fragments and errors
-    all_fragments = sf.random_insert(
-        fasta, fragment_lengths, READLEN, MINLENGTH)
+    all_fragments = sf.random_insert(fasta, fragment_lengths, READLEN, MINLENGTH)
     fwd_illu_err = markov_multi_fwd(process=PROCESS, nreads=len(all_fragments))
     rev_illu_err = markov_multi_rev(process=PROCESS, nreads=len(all_fragments))
 
-    runlist = sf.prepare_run(all_frag=all_fragments,
-                             all_fwd_err=fwd_illu_err, all_rev_err=rev_illu_err)
+    runlist = sf.prepare_run(
+        all_frag=all_fragments, all_fwd_err=fwd_illu_err, all_rev_err=rev_illu_err
+    )
 
-    result = multi_run(iterables=runlist,
-                       name=basename,
-                       mutate=MUTATE,
-                       mutrate=correct_mutrate,
-                       damage=DAMAGE,
-                       geom_p=GEOM_P,
-                       themin=THEMIN,
-                       themax=THEMAX,
-                       fwd_adaptor=A1,
-                       rev_adaptor=A2,
-                       read_length=READLEN,
-                       process=PROCESS)
+    result = multi_run(
+        iterables=runlist,
+        name=basename,
+        mutate=MUTATE,
+        mutrate=correct_mutrate,
+        damage=DAMAGE,
+        geom_p=GEOM_P,
+        themin=THEMIN,
+        themax=THEMAX,
+        fwd_adaptor=A1,
+        rev_adaptor=A2,
+        read_length=READLEN,
+        process=PROCESS,
+    )
     write_fastq_multi(fastq_list=result, outputfile=FASTQ_OUT)
-    return([nread * INSERLEN, INSERLEN, COV, DAMAGE])
+    return [nread * INSERLEN, INSERLEN, COV, DAMAGE]
 
 
 def specie_to_taxid(specie):
@@ -222,7 +287,7 @@ def specie_to_taxid(specie):
     request = "http://taxonomy.jgi-psf.org/tax/pt_name/" + specie
     response = requests.get(request)
     answer = response.text
-    return(answer)
+    return answer
 
 
 def write_stat(stat_dict, stat_out):
@@ -232,8 +297,21 @@ def write_stat(stat_dict, stat_out):
     totbases = sum(nbases)
     with open(stat_out, "w") as fs:
         fs.write(
-            "Organism,taxonomy_id,percentage of metagenome,mean_insert_length,target_coverage,deamination\n")
+            "Organism,taxonomy_id,percentage of metagenome,mean_insert_length,target_coverage,deamination\n"
+        )
         for akey in stat_dict:
             taxid = specie_to_taxid(akey)
-            fs.write(akey + "," + str(taxid) + "," + str(round(stat_dict[akey][0] / totbases, 2)) + "," + str(
-                stat_dict[akey][1]) + "," + str(stat_dict[akey][2]) + "," + str(stat_dict[akey][3]) + "\n")
+            fs.write(
+                akey
+                + ","
+                + str(taxid)
+                + ","
+                + str(round(stat_dict[akey][0] / totbases, 2))
+                + ","
+                + str(stat_dict[akey][1])
+                + ","
+                + str(stat_dict[akey][2])
+                + ","
+                + str(stat_dict[akey][3])
+                + "\n"
+            )
