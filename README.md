@@ -68,7 +68,7 @@ You can cite ADRSM like this:
                                    [default: 0.3]
 
       -e, --effort INTEGER         Sequencing effort, maximum number of output reads to
-                                   be sampled from pool [default: 100]
+                                   be sampled from pool [default: 1000000]
 
       -s, --seed INTEGER           Seed for random generator generator  [default:
                                    42]
