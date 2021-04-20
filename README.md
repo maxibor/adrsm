@@ -67,8 +67,8 @@ You can cite ADRSM like this:
       -M, --maxD FLOAT RANGE       Deamination substitution max frequency
                                    [default: 0.3]
 
-      -e, --effort INTEGER         Sequencing effort, maximum number of reads to
-                                   be generated  [default: 100]
+      -e, --effort INTEGER         Sequencing effort, maximum number of output reads to
+                                   be sampled from pool [default: 100]
 
       -s, --seed INTEGER           Seed for random generator generator  [default:
                                    42]
@@ -134,6 +134,13 @@ The base quality score (Qscore) is generated using a Markov chain from fastq tem
 
 Until version 0.9.1, ADRSM simulated Illumina sequencing error with a uniform based model.
 From version 0.9.2 onwards, ADRSM simulates the sequencing error based on the [QScore](https://support.illumina.com/help/BaseSpace_OLH_009008/Content/Source/Informatics/BS/QualityScoreEncoding_swBS.htm).
+
+## Note on sequencing effort
+
+ADRSM initially generates reads based on the theoretical maximum from the depth coverage specified in the config file.  In contrast, sequencers have a fixed number of 'slots' on a flowcell that DNA from all libraries in the sequencing pool will 'compete' for (e.g. approximate maximum of 300 million reads for a HiSeq lane). Therefore, in reality not all reads of a library are actually sequenced. 
+
+ADRSM simulates this by randomly subsampling the entire read pool generated at the maximum depth coverage, down to 
+the number of reads provided to `--effort`. 
 
 ## Note on mutation
 
