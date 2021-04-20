@@ -72,10 +72,10 @@ import random
 @click.option(
     "-e",
     "--effort",
-    default=100,
+    default=1000000,
     type=int,
     show_default=True,
-    help="Sequencing effort, maximum number of reads to be generated",
+    help="Sequencing effort, maximum number of output reads to be sampled from pool",
 )
 @click.option(
     "-s",
