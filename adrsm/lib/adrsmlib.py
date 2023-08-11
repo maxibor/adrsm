@@ -12,6 +12,7 @@ from pkg_resources import resource_filename
 from . import sequencefunctions as sf
 from . import markov as mk
 from xopen import xopen
+from tqdm.contrib.concurrent import process_map
 
 
 def parse_yes_no(astring):
@@ -107,15 +108,13 @@ def markov_wrapper_rev(times):
 
 def markov_multi_fwd(process, nreads):
     myIter = range(nreads)
-    with multiprocessing.Pool(process) as p:
-        r = p.map(markov_wrapper_fwd, myIter)
+    r = process_map(markov_wrapper_fwd, myIter, max_workers=process, chunksize=1)
     return r
 
 
 def markov_multi_rev(process, nreads):
     myIter = range(nreads)
-    with multiprocessing.Pool(process) as p:
-        r = p.map(markov_wrapper_rev, myIter)
+    r = process_map(markov_wrapper_rev, myIter, max_workers=process, chunksize=1)
     return r
 
 
@@ -166,8 +165,9 @@ def multi_run(
         rev_adaptor=rev_adaptor,
         read_length=read_length,
     )
-    with multiprocessing.Pool(process) as p:
-        r = p.map(partial_run, iterables)
+
+    r = process_map(partial_run, iterables, max_workers=process, chunksize=1)
+
     return r
 
 
@@ -247,13 +247,15 @@ def run_read_simulation_multi(
 
     # Prepare fragments and errors
     all_fragments = sf.random_insert(fasta, fragment_lengths, READLEN, MINLENGTH)
+    print("Generating forward errors...")
     fwd_illu_err = markov_multi_fwd(process=PROCESS, nreads=len(all_fragments))
+    print("Generating reverse errors...")
     rev_illu_err = markov_multi_rev(process=PROCESS, nreads=len(all_fragments))
 
     runlist = sf.prepare_run(
         all_frag=all_fragments, all_fwd_err=fwd_illu_err, all_rev_err=rev_illu_err
     )
-
+    print("Generating reads...")
     result = multi_run(
         iterables=runlist,
         name=basename,

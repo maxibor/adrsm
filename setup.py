@@ -16,6 +16,7 @@ setup(
         "requests >= 2.22",
         "click",
         "xopen",
+        "tqdm",
     ],
     packages=find_packages(include=["adrsm", "adrsm.lib"]),
     package_data={"adrsm": ["data/quality/fwd_qual.p", "data/quality/rev_qual.p"]},
